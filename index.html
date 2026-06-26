@@ -13,23 +13,28 @@
    CSS Custom Properties
    ============================================================ */
 :root {
-  --bg-body: #0a0a0f;
-  --bg-card: #12121a;
-  --bg-header: #0d0d14;
-  --border-card: #1e1e32;
-  --text-primary: #e8e8f0;
-  --text-secondary: #9898b0;
-  --text-muted: #6a6a80;
-  --green: #00e676;
-  --amber: #ffab00;
-  --red: #ff1744;
-  --blue: #448aff;
-  --purple: #7c4dff;
-  --font-heading: 'Red Hat Display', sans-serif;
-  --font-body: 'Red Hat Text', sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
-  --radius: 12px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg: #0a0e17;
+  --bg-card: #0f1520;
+  --bg-panel: #111827;
+  --border: #1a2235;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.15);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --cyan: #06b6d4;
+  --purple: #8b5cf6;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --mono: 'SF Mono','Fira Code','Cascadia Code','JetBrains Mono',Consolas,monospace;
+  --head: 'Red Hat Display',sans-serif;
+  --body: 'Red Hat Text',sans-serif;
+  --r: 10px;
+  --r-sm: 6px;
 }
 
 /* ============================================================
@@ -38,9 +43,9 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: var(--font-body);
-  background: var(--bg-body);
-  color: var(--text-primary);
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -49,1865 +54,1553 @@ body {
 /* ============================================================
    Header
    ============================================================ */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(13, 13, 20, 0.85);
+.hdr {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,14,23,0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-card);
-  padding: 0 32px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
 }
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.header-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-.header-logo img {
-  width: 32px;
-  height: 32px;
-}
-.header-logo span {
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-size: 1.15rem;
-  color: var(--text-primary);
-}
-.header-divider {
-  width: 1px;
-  height: 28px;
-  background: var(--border-card);
-}
-.header-title {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
+.hdr-left { display: flex; align-items: center; gap: 14px; }
+.hdr-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.hdr-logo img { width: 28px; height: 28px; }
+.hdr-logo span { font-family: var(--head); font-weight: 900; font-size: 1.05rem; color: var(--text); }
+.hdr-div { width: 1px; height: 24px; background: var(--border); }
+.hdr-title { font-family: var(--head); font-weight: 700; font-size: 0.85rem; color: var(--text3); }
+.hdr-right { display: flex; align-items: center; gap: 16px; }
+.hdr-right a { font-size: 0.8rem; color: var(--text3); text-decoration: none; transition: color 0.2s; }
+.hdr-right a:hover { color: var(--text); }
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.78rem; color: var(--text2);
+  padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
 }
 .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  position: relative;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); position: relative;
 }
 .status-dot::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  background: inherit;
-  opacity: 0.4;
-  animation: pulse-dot 2s ease-in-out infinite;
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  background: inherit; opacity: 0.4; animation: pulse 2s ease-in-out infinite;
 }
-.status-dot.critical {
-  background: var(--red);
-}
-.status-dot.warning {
-  background: var(--amber);
-}
-@keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 0.4; }
+.status-dot.warn { background: var(--amber); }
+.status-dot.crit { background: var(--red); }
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity: 0.4; }
   50% { transform: scale(1.8); opacity: 0; }
 }
-.header-link {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color var(--transition);
-}
-.header-link:hover {
-  color: var(--text-primary);
-}
 
 /* ============================================================
-   Main Layout
+   Layout
    ============================================================ */
-.main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px;
+.main { max-width: 1500px; margin: 0 auto; padding: 20px 24px; }
+
+/* Top Bar */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
 }
-.dashboard {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 24px;
-  margin-bottom: 24px;
+.top-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.scale-info { display: flex; align-items: center; gap: 10px; }
+.gpu-count { font-family: var(--head); font-weight: 900; font-size: 2rem; color: var(--accent); line-height: 1; }
+.gpu-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.scale-btns { display: flex; gap: 6px; }
+
+/* Buttons */
+.btn {
+  font-family: var(--body); font-size: 0.8rem; font-weight: 700;
+  padding: 8px 18px; border-radius: var(--r);
+  border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text); cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
-@media (max-width: 1100px) {
-  .dashboard { grid-template-columns: 1fr; }
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px var(--accent-dim); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: #2563eb; box-shadow: 0 0 20px var(--accent-dim); }
+.btn.secondary { border-color: var(--text3); color: var(--text2); }
+.btn.secondary:hover:not(:disabled) { border-color: var(--text); color: var(--text); }
+.btn.danger { border-color: var(--red); color: var(--red); }
+.btn.danger:hover:not(:disabled) { background: var(--red-dim); }
+.top-right { display: flex; align-items: center; gap: 16px; }
+
+/* Toggle */
+.toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.toggle-lbl { font-size: 0.75rem; color: var(--text3); white-space: nowrap; transition: color 0.3s; }
+.toggle-lbl.active { color: var(--text); font-weight: 700; }
+.toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: rgba(239,68,68,0.25); border-radius: 12px; transition: background 0.3s;
 }
+.toggle input:checked + .toggle-track { background: rgba(34,197,94,0.3); }
+.toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--red); transition: all 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.toggle input:checked ~ .toggle-thumb { transform: translateX(20px); background: var(--green); }
+
+/* Score Ring */
+.score-wrap { display: flex; align-items: center; gap: 10px; }
+.score-ring { position: relative; width: 56px; height: 56px; }
+.score-ring svg { width: 56px; height: 56px; transform: rotate(-90deg); }
+.score-ring .bg { fill: none; stroke: var(--border); stroke-width: 4; }
+.score-ring .fg { fill: none; stroke: var(--green); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease, stroke 0.4s; }
+.score-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 700; font-size: 0.95rem; }
+.score-label-text { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.3; }
 
 /* ============================================================
-   Card Base
+   Dashboard Grid
    ============================================================ */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
+.dash { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+@media (max-width: 1100px) { .dash { grid-template-columns: 1fr; } }
+
+/* Canvas Card */
+.canvas-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; position: relative;
 }
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--green), var(--blue));
-  transition: background var(--transition);
+.canvas-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
 }
-.card.warning::before {
-  background: linear-gradient(90deg, var(--amber), var(--red));
+.canvas-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.78rem;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3);
 }
-.card.critical::before {
-  background: linear-gradient(90deg, var(--red), #ff6090);
+.canvas-card canvas { display: block; width: 100%; }
+
+/* Failure Banner */
+.fail-banner {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(10,14,23,0.96));
+  padding: 20px;
+  transform: translateY(100%); transition: transform 0.4s ease; pointer-events: none;
 }
-.card.fixed::before {
-  background: linear-gradient(90deg, var(--green), var(--purple));
-}
-.card-title {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
+.fail-banner.show { transform: translateY(0); pointer-events: auto; }
+.fail-icon { font-size: 1rem; margin-right: 6px; }
+.fail-title { font-family: var(--head); font-weight: 900; font-size: 0.95rem; color: var(--red); margin-bottom: 4px; }
+.fail-title.warn-title { color: var(--amber); }
+.fail-desc { font-size: 0.78rem; color: var(--text2); line-height: 1.5; }
 
 /* ============================================================
-   Cluster Visualization
+   Metrics Sidebar
    ============================================================ */
-.cluster-area {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.metrics { display: flex; flex-direction: column; gap: 8px; }
+.m-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 14px;
+  position: relative; overflow: hidden;
 }
-.pods-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+.m-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--green); transition: background 0.3s;
 }
-@media (max-width: 900px) {
-  .pods-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 500px) {
-  .pods-grid { grid-template-columns: 1fr; }
-}
-.pod-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 16px;
-  position: relative;
-  overflow: hidden;
-  transition: all var(--transition);
-}
-.pod-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--green);
-  transition: background var(--transition);
-}
-.pod-card.warning::before { background: var(--amber); }
-.pod-card.critical::before { background: var(--red); }
-.pod-card.down::before { background: var(--text-muted); }
-.pod-card.down {
-  opacity: 0.4;
-  border-color: rgba(30, 30, 50, 0.4);
-}
-.pod-card.shake {
-  animation: shake 0.5s ease-in-out;
-}
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 50%, 90% { transform: translateX(-3px); }
-  30%, 70% { transform: translateX(3px); }
-}
-@keyframes pod-enter {
-  0% { opacity: 0; transform: scale(0.7); }
-  60% { opacity: 1; transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-.pod-card.entering {
-  animation: pod-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-.pod-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.pod-name {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-}
-.pod-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  transition: background var(--transition);
-  flex-shrink: 0;
-}
-.pod-status-dot.warning { background: var(--amber); }
-.pod-status-dot.critical { background: var(--red); }
-.pod-status-dot.down { background: var(--text-muted); }
-.pod-down-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-size: 1rem;
-  color: var(--red);
-  background: rgba(10, 10, 15, 0.8);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition);
-  z-index: 2;
-}
-.pod-down-label.visible {
-  opacity: 1;
-}
-.pod-down-sublabel {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-.cache-flash {
-  position: absolute;
-  top: 40px;
-  right: 12px;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 3;
-  pointer-events: none;
-}
-.cache-flash.miss {
-  background: rgba(255, 23, 68, 0.2);
-  color: var(--red);
-}
-.cache-flash.hit {
-  background: rgba(0, 230, 118, 0.2);
-  color: var(--green);
-}
-.cache-flash.visible {
-  opacity: 1;
-}
-
-/* Pod Bars */
-.pod-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.bar-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.bar-label {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  width: 52px;
-  flex-shrink: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.bar-track {
-  flex: 1;
-  height: 6px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-}
-.bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--green);
-  transition: width 0.3s ease, background 0.4s ease;
-  width: 0%;
-}
-.bar-fill.warning { background: var(--amber); }
-.bar-fill.critical { background: var(--red); }
-.bar-value {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-  width: 32px;
-  text-align: right;
-  flex-shrink: 0;
-}
-.queue-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.04);
-}
-.queue-label {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  width: 52px;
-  flex-shrink: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.queue-blocks {
-  flex: 1;
-  display: flex;
-  gap: 2px;
-  height: 6px;
-}
-.queue-block {
-  width: 4px;
-  height: 6px;
-  border-radius: 1px;
-  background: var(--green);
-  transition: background var(--transition);
-  opacity: 0;
-  transition: opacity 0.15s, background 0.3s;
-}
-.queue-block.active { opacity: 1; }
-.queue-block.warning { background: var(--amber); }
-.queue-block.critical { background: var(--red); }
-.queue-value {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-  width: 32px;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   Metrics Panel
-   ============================================================ */
-.metrics-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.metric-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color var(--transition);
-}
-.metric-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--green);
-  transition: background var(--transition);
-}
-.metric-card.warning::before { background: var(--amber); }
-.metric-card.critical::before { background: var(--red); }
-.metric-label {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-.metric-value-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-.metric-value {
-  font-family: var(--font-mono);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.1;
-  transition: color var(--transition);
-}
-.metric-value.warning { color: var(--amber); }
-.metric-value.critical { color: var(--red); }
-.metric-value.good { color: var(--green); }
-.metric-unit {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-left: 4px;
-}
-.metric-trend {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.metric-trend.up {
-  color: var(--red);
-  background: rgba(255, 23, 68, 0.12);
-}
-.metric-trend.down {
-  color: var(--green);
-  background: rgba(0, 230, 118, 0.12);
-}
-.metric-trend.neutral {
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.05);
-}
-.sparkline-container {
-  margin-top: 8px;
-  height: 24px;
-}
-.sparkline-container svg {
-  width: 100%;
-  height: 24px;
-}
-.sparkline-path {
-  fill: none;
-  stroke: var(--green);
-  stroke-width: 1.5;
-  transition: stroke var(--transition);
-}
-.sparkline-path.warning { stroke: var(--amber); }
-.sparkline-path.critical { stroke: var(--red); }
-.sparkline-area {
-  fill: rgba(0, 230, 118, 0.08);
-  transition: fill var(--transition);
-}
-.sparkline-area.warning { fill: rgba(255, 171, 0, 0.08); }
-.sparkline-area.critical { fill: rgba(255, 23, 68, 0.08); }
-
-/* ============================================================
-   Load Control
-   ============================================================ */
-.load-control {
-  margin-bottom: 24px;
-}
-.load-control-inner {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-.load-label-area {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 120px;
-}
-.load-label-title {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-.load-label-value {
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.slider-track {
-  flex: 1;
-  position: relative;
-}
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 4px;
-  outline: none;
-  cursor: pointer;
-  position: relative;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--text-primary);
-  border: 3px solid var(--bg-body);
-  box-shadow: 0 0 0 2px var(--border-card), 0 2px 8px rgba(0,0,0,0.4);
-  cursor: grab;
-  transition: box-shadow 0.2s, transform 0.15s;
-}
-input[type="range"]::-webkit-slider-thumb:active {
-  cursor: grabbing;
-  transform: scale(1.15);
-  box-shadow: 0 0 0 2px var(--blue), 0 2px 12px rgba(68,138,255,0.3);
-}
-input[type="range"]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--text-primary);
-  border: 3px solid var(--bg-body);
-  box-shadow: 0 0 0 2px var(--border-card), 0 2px 8px rgba(0,0,0,0.4);
-  cursor: grab;
-}
-.slider-fill-bg {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  height: 8px;
-  border-radius: 4px;
-  background: var(--green);
-  pointer-events: none;
-  transition: background var(--transition);
-  z-index: 0;
-}
-.slider-fill-bg.warning { background: var(--amber); }
-.slider-fill-bg.critical { background: var(--red); }
-.load-thresholds {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  padding: 0 2px;
-}
-.load-threshold {
-  font-size: 0.62rem;
-  color: var(--text-muted);
-  position: relative;
-}
-.reset-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border-card);
-  border-radius: 8px;
-  color: var(--text-secondary);
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-.reset-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: var(--text-primary);
-  border-color: var(--text-muted);
-}
+.m-card.warn::before { background: var(--amber); }
+.m-card.crit::before { background: var(--red); }
+.m-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.m-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+.m-trend { font-family: var(--mono); font-size: 0.62rem; padding: 1px 5px; border-radius: 4px; }
+.m-trend.bad { color: var(--red); background: var(--red-dim); }
+.m-trend.good { color: var(--green); background: var(--green-dim); }
+.m-trend.flat { color: var(--text3); background: rgba(255,255,255,0.03); }
+.m-row { display: flex; align-items: baseline; gap: 3px; }
+.m-val { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; line-height: 1.2; transition: color 0.3s; }
+.m-unit { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); }
+.spark { margin-top: 4px; height: 20px; }
+.spark canvas { width: 100%; height: 20px; display: block; }
 
 /* ============================================================
    Fix Panel
    ============================================================ */
 .fix-panel {
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, margin 0.4s ease;
-  margin-bottom: 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px 20px;
+  margin-top: 12px; display: none;
 }
-.fix-panel.visible {
-  max-height: 600px;
-  opacity: 1;
-  margin-bottom: 24px;
+.fix-panel.show { display: block; }
+.fix-panel::before {
+  content: ''; display: block; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  margin: -16px -20px 14px; border-radius: var(--r) var(--r) 0 0;
 }
-.fix-panel-inner {
-  padding-top: 4px;
+.fix-header { margin-bottom: 12px; }
+.fix-prompt {
+  font-family: var(--head); font-weight: 900; font-size: 0.9rem; color: var(--amber);
 }
-.fix-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-}
-@media (max-width: 1100px) {
-  .fix-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
-  .fix-grid { grid-template-columns: 1fr; }
-}
+.fix-prompt.correct { color: var(--green); }
+.fix-prompt.wrong { color: var(--red); }
+.fix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 800px) { .fix-grid { grid-template-columns: 1fr; } }
 .fix-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 16px;
-  cursor: pointer;
-  text-align: left;
-  transition: all var(--transition);
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px; cursor: pointer;
+  text-align: left; transition: all 0.2s; position: relative; overflow: hidden;
 }
-.fix-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--purple);
-  opacity: 0;
-  transition: opacity var(--transition);
+.fix-btn:hover:not(.correct):not(.wrong):not(.disabled) {
+  border-color: var(--accent); box-shadow: 0 0 16px var(--accent-dim);
 }
-.fix-btn:hover:not(:disabled) {
-  border-color: var(--purple);
-  box-shadow: 0 0 20px rgba(124, 77, 255, 0.1);
+.fix-btn.correct { border-color: var(--green); background: var(--green-dim); cursor: default; }
+.fix-btn.wrong { border-color: var(--red); background: var(--red-dim); animation: shake 0.5s ease; }
+.fix-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-4px); }
+  40%,80% { transform: translateX(4px); }
 }
-.fix-btn:hover:not(:disabled)::before {
-  opacity: 1;
+.fix-num { font-family: var(--mono); font-size: 0.62rem; color: var(--accent); margin-bottom: 4px; }
+.fix-name { font-family: var(--head); font-weight: 700; font-size: 0.82rem; color: var(--text); margin-bottom: 3px; }
+.fix-desc { font-size: 0.7rem; color: var(--text3); line-height: 1.4; }
+.fix-result {
+  margin-top: 10px; padding: 10px 14px; border-radius: var(--r);
+  font-size: 0.78rem; line-height: 1.5; display: none;
 }
-.fix-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.fix-result.show { display: block; }
+.fix-result.ok { background: var(--green-dim); border: 1px solid rgba(34,197,94,0.25); color: var(--green); }
+.fix-result.bad { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; }
+
+/* Production Badge */
+.prod-badge {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px; background: var(--green-dim);
+  border: 1px solid rgba(34,197,94,0.25); border-radius: var(--r);
+  margin-top: 12px; opacity: 0; transform: translateY(8px);
+  transition: all 0.5s ease;
 }
-.fix-btn.applied {
-  border-color: var(--green);
-  opacity: 1;
-}
-.fix-btn.applied::before {
-  background: var(--green);
-  opacity: 1;
-}
-.fix-btn-number {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--purple);
-  margin-bottom: 6px;
-}
-.fix-btn.applied .fix-btn-number {
-  color: var(--green);
-}
-.fix-btn-title {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-.fix-btn-desc {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-.fix-btn-check {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--green);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.fix-btn.applied .fix-btn-check {
-  opacity: 1;
-  transform: scale(1);
-}
-.fix-btn-check svg {
-  width: 12px;
-  height: 12px;
+.prod-badge.show { opacity: 1; transform: translateY(0); }
+.prod-badge-text {
+  font-family: var(--head); font-weight: 900; font-size: 0.85rem;
+  color: var(--green); text-transform: uppercase; letter-spacing: 0.1em;
 }
 
-/* Production Ready Badge */
-.production-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 24px;
-  background: rgba(0, 230, 118, 0.06);
-  border: 1px solid rgba(0, 230, 118, 0.2);
-  border-radius: var(--radius);
-  margin-top: 16px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* ============================================================
+   Known Limits
+   ============================================================ */
+.limits-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); margin-top: 12px; overflow: hidden;
 }
-.production-badge.visible {
-  opacity: 1;
-  transform: translateY(0);
+.limits-toggle-btn {
+  width: 100%; padding: 12px 20px; background: none; border: none;
+  color: var(--text2); font-family: var(--head); font-weight: 700;
+  font-size: 0.78rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  text-transform: uppercase; letter-spacing: 0.06em;
 }
-.production-badge-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--green);
-  position: relative;
+.limits-toggle-btn:hover { color: var(--text); }
+.limits-arrow { transition: transform 0.3s; font-size: 0.7rem; }
+.limits-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.limits-body.open { max-height: 600px; }
+.limits-list { padding: 4px 20px 16px; }
+.limit-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid rgba(26,34,53,0.6);
 }
-.production-badge-dot::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: var(--green);
-  opacity: 0.3;
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-.production-badge-text {
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-size: 0.95rem;
-  color: var(--green);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
+.limit-row:last-child { border-bottom: none; }
+.limit-name { font-size: 0.75rem; color: var(--text2); }
+.limit-val { font-family: var(--mono); font-size: 0.75rem; color: var(--cyan); font-weight: 700; }
 
 /* ============================================================
    Footer
    ============================================================ */
-.footer {
-  text-align: center;
-  padding: 32px;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  border-top: 1px solid var(--border-card);
-  margin-top: 24px;
+.ftr {
+  text-align: center; padding: 24px; color: var(--text3);
+  font-size: 0.75rem; border-top: 1px solid var(--border); margin-top: 24px;
 }
-.footer a {
-  color: var(--text-secondary);
-  text-decoration: none;
-}
-.footer a:hover {
-  color: var(--text-primary);
-}
+.ftr a { color: var(--text2); text-decoration: none; }
+.ftr a:hover { color: var(--text); }
 
 /* ============================================================
-   Animations
+   Scrollbar
    ============================================================ */
-@keyframes card-enter {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-in {
-  animation: card-enter 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-@keyframes flash-red {
-  0%, 100% { box-shadow: none; }
-  50% { box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.15); }
-}
-.pod-card.flash-red {
-  animation: flash-red 0.8s ease;
-}
-
-/* Timeout counter */
-.timeout-counter {
-  position: absolute;
-  bottom: 8px;
-  right: 12px;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  color: var(--red);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.timeout-counter.visible {
-  opacity: 1;
-}
-
-/* ============================================================
-   Scrollbar styling
-   ============================================================ */
-/* Intro bar */
-.intro-bar {
-  margin-bottom: 20px;
-  padding: 0 4px;
-}
-.intro-text {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  max-width: 800px;
-}
-
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 </style>
 </head>
 <body>
 
-<!-- ======================================================
-     HEADER
-     ====================================================== -->
-<header class="header">
-  <div class="header-left">
-    <a class="header-logo" href="https://llm-d.ai" target="_blank" rel="noopener">
-      <img src="https://llm-d.ai/img/llm-d-icon.png" alt="llm-d icon">
+<!-- Header -->
+<header class="hdr">
+  <div class="hdr-left">
+    <a class="hdr-logo" href="https://llm-d.ai" target="_blank" rel="noopener">
+      <img src="https://llm-d.ai/img/llm-d-icon.png" alt="llm-d">
       <span>llm-d</span>
     </a>
-    <div class="header-divider"></div>
-    <span class="header-title">What Breaks at Scale</span>
+    <div class="hdr-div"></div>
+    <span class="hdr-title">What Breaks at Scale</span>
   </div>
-  <div class="header-right">
-    <div class="status-indicator">
-      <div class="status-dot" id="globalStatusDot"></div>
-      <span id="globalStatusText">System Healthy</span>
+  <div class="hdr-right">
+    <div class="status-pill">
+      <div class="status-dot" id="sDot"></div>
+      <span id="sText">System Healthy</span>
     </div>
-    <div class="header-divider"></div>
-    <a class="header-link" href="https://markellr-redhat.github.io/llm-d-content-hub/" target="_blank" rel="noopener">Content Hub</a>
-    <a class="header-link" href="blog/" rel="noopener">Blog</a>
+    <div class="hdr-div"></div>
+    <a href="https://markellr-redhat.github.io/llm-d-content-hub/" target="_blank" rel="noopener">Content Hub</a>
+    <a href="blog/" rel="noopener">Blog</a>
   </div>
 </header>
 
-<!-- ======================================================
-     MAIN
-     ====================================================== -->
+<!-- Main -->
 <main class="main">
 
-  <!-- Intro -->
-  <div class="intro-bar animate-in" style="animation-delay: 0.02s">
-    <p class="intro-text">Start with a working 3-pod vLLM inference cluster. Drag the load slider to increase traffic and watch 5 failure modes cascade. Then install llm-d components one by one to fix each problem.</p>
-  </div>
-
-  <!-- Load Control -->
-  <div class="card load-control animate-in" style="animation-delay: 0.05s">
-    <div class="load-control-inner">
-      <div class="load-label-area">
-        <span class="load-label-title">Request Load</span>
-        <span class="load-label-value" id="loadValue">0%</span>
-      </div>
-      <div class="slider-track">
-        <div class="slider-fill-bg" id="sliderFill"></div>
-        <input type="range" id="loadSlider" min="0" max="100" value="0">
-        <div class="load-thresholds">
-          <span class="load-threshold">0%</span>
-          <span class="load-threshold" style="color:var(--amber)">30%</span>
-          <span class="load-threshold" style="color:var(--amber)">45%</span>
-          <span class="load-threshold" style="color:var(--red)">60%</span>
-          <span class="load-threshold" style="color:var(--red)">75%</span>
-          <span class="load-threshold" style="color:var(--red)">90%</span>
-          <span class="load-threshold">100%</span>
+  <!-- Top Bar: Scale controls + Score + Toggle -->
+  <div class="top-bar">
+    <div class="top-left">
+      <div class="scale-info">
+        <span class="gpu-count" id="gpuCount">1</span>
+        <div>
+          <div class="gpu-label">GPUs</div>
         </div>
       </div>
-      <button class="reset-btn" id="resetBtn">Reset</button>
-    </div>
-  </div>
-
-  <!-- Dashboard -->
-  <div class="dashboard">
-
-    <!-- Cluster Area -->
-    <div class="cluster-area">
-      <div class="card animate-in" style="animation-delay: 0.1s" id="clusterCard">
-        <div class="card-title">Cluster Pods</div>
-        <div class="pods-grid" id="podsGrid">
-          <!-- Pods rendered by JS -->
-        </div>
+      <div class="scale-btns">
+        <button class="btn secondary" id="scaleDownBtn" disabled>Scale Down</button>
+        <button class="btn primary" id="scaleUpBtn">Scale Up</button>
+        <button class="btn danger" id="resetBtn">Reset</button>
       </div>
     </div>
+    <div class="top-right">
+      <!-- Before/After Toggle -->
+      <div class="toggle-wrap">
+        <span class="toggle-lbl active" id="toggleOff">Without llm-d</span>
+        <label class="toggle">
+          <input type="checkbox" id="llmdToggle">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+        <span class="toggle-lbl" id="toggleOn">With llm-d</span>
+      </div>
 
-    <!-- Metrics Panel -->
-    <div class="metrics-panel">
-      <!-- TTFT -->
-      <div class="metric-card animate-in" style="animation-delay: 0.15s" id="metricTTFT">
-        <div class="metric-label">Time to First Token</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="ttftValue">180</span><span class="metric-unit">ms</span></div>
-          <span class="metric-trend neutral" id="ttftTrend">--</span>
+      <!-- Score Ring -->
+      <div class="score-wrap">
+        <div class="score-ring">
+          <svg viewBox="0 0 56 56">
+            <circle class="bg" cx="28" cy="28" r="24"/>
+            <circle class="fg" id="scoreArc" cx="28" cy="28" r="24"
+              stroke-dasharray="150.8" stroke-dashoffset="0"/>
+          </svg>
+          <div class="score-val" id="scoreVal">100</div>
         </div>
-        <div class="sparkline-container"><svg id="ttftSparkline" viewBox="0 0 280 24" preserveAspectRatio="none"></svg></div>
-      </div>
-      <!-- Throughput -->
-      <div class="metric-card animate-in" style="animation-delay: 0.2s" id="metricThroughput">
-        <div class="metric-label">Throughput</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="throughputValue">120</span><span class="metric-unit">req/s</span></div>
-          <span class="metric-trend neutral" id="throughputTrend">--</span>
-        </div>
-        <div class="sparkline-container"><svg id="throughputSparkline" viewBox="0 0 280 24" preserveAspectRatio="none"></svg></div>
-      </div>
-      <!-- Cache Hit Rate -->
-      <div class="metric-card animate-in" style="animation-delay: 0.25s" id="metricCache">
-        <div class="metric-label">Cache Hit Rate</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="cacheValue">82</span><span class="metric-unit">%</span></div>
-          <span class="metric-trend neutral" id="cacheTrend">--</span>
-        </div>
-        <div class="sparkline-container"><svg id="cacheSparkline" viewBox="0 0 280 24" preserveAspectRatio="none"></svg></div>
-      </div>
-      <!-- Queue Depth -->
-      <div class="metric-card animate-in" style="animation-delay: 0.3s" id="metricQueue">
-        <div class="metric-label">Queue Depth</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="queueValue">4</span></div>
-          <span class="metric-trend neutral" id="queueTrend">--</span>
-        </div>
-        <div class="sparkline-container"><svg id="queueSparkline" viewBox="0 0 280 24" preserveAspectRatio="none"></svg></div>
-      </div>
-      <!-- Active Pods -->
-      <div class="metric-card animate-in" style="animation-delay: 0.35s" id="metricPods">
-        <div class="metric-label">Active Pods</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="podsValue">3</span><span class="metric-unit">/ 3</span></div>
-          <span class="metric-trend neutral" id="podsTrend">--</span>
-        </div>
-      </div>
-      <!-- Pod Restarts -->
-      <div class="metric-card animate-in" style="animation-delay: 0.4s" id="metricRestarts">
-        <div class="metric-label">Pod Restarts</div>
-        <div class="metric-value-row">
-          <div><span class="metric-value" id="restartsValue">0</span></div>
-          <span class="metric-trend neutral" id="restartsTrend">--</span>
-        </div>
+        <div class="score-label-text">Scale<br>Score</div>
       </div>
     </div>
   </div>
 
-  <!-- Fix Panel -->
-  <div class="fix-panel" id="fixPanel">
-    <div class="card fix-panel-inner" id="fixCard">
-      <div class="card-title">llm-d -- Fix It</div>
-      <div class="fix-grid">
-        <button class="fix-btn" id="fix0" disabled>
-          <div class="fix-btn-number">01</div>
-          <div class="fix-btn-title">Install EPP</div>
-          <div class="fix-btn-desc">Endpoint Picker for intelligent load balancing across pods</div>
-          <div class="fix-btn-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </button>
-        <button class="fix-btn" id="fix1" disabled>
-          <div class="fix-btn-number">02</div>
-          <div class="fix-btn-title">Cache-Aware Routing</div>
-          <div class="fix-btn-desc">Route requests to pods with warm KV cache for the prompt prefix</div>
-          <div class="fix-btn-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </button>
-        <button class="fix-btn" id="fix2" disabled>
-          <div class="fix-btn-number">03</div>
-          <div class="fix-btn-title">Horizontal Scaling</div>
-          <div class="fix-btn-desc">Auto-scale pod replicas based on request demand</div>
-          <div class="fix-btn-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </button>
-        <button class="fix-btn" id="fix3" disabled>
-          <div class="fix-btn-number">04</div>
-          <div class="fix-btn-title">Health-Aware Routing</div>
-          <div class="fix-btn-desc">Drain unhealthy pods and route traffic to healthy ones</div>
-          <div class="fix-btn-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </button>
-        <button class="fix-btn" id="fix4" disabled>
-          <div class="fix-btn-number">05</div>
-          <div class="fix-btn-title">Full llm-d Stack</div>
-          <div class="fix-btn-desc">All components working together -- production ready inference</div>
-          <div class="fix-btn-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </button>
+  <!-- Dashboard Grid -->
+  <div class="dash">
+    <!-- Left column: Canvas + Fix + Limits -->
+    <div>
+      <div class="canvas-card" id="canvasCard">
+        <div class="canvas-header">
+          <span class="canvas-title" id="canvasTitle">Cluster Visualization &mdash; 1 GPU</span>
+        </div>
+        <canvas id="clusterCanvas"></canvas>
+        <div class="fail-banner" id="failBanner">
+          <div class="fail-title" id="failTitle"></div>
+          <div class="fail-desc" id="failDesc"></div>
+        </div>
       </div>
-      <div class="production-badge" id="productionBadge">
-        <div class="production-badge-dot"></div>
-        <span class="production-badge-text">Production Ready</span>
+
+      <!-- Fix Panel -->
+      <div class="fix-panel" id="fixPanel">
+        <div class="fix-header">
+          <div class="fix-prompt" id="fixPrompt">Choose the correct fix:</div>
+        </div>
+        <div class="fix-grid" id="fixGrid"></div>
+        <div class="fix-result" id="fixResult"></div>
+        <div class="prod-badge" id="prodBadge">
+          <div class="status-dot"></div>
+          <span class="prod-badge-text">Production Ready</span>
+        </div>
+      </div>
+
+      <!-- Known Limits -->
+      <div class="limits-panel">
+        <button class="limits-toggle-btn" id="limitsToggle">
+          Known Infrastructure Limits
+          <span class="limits-arrow" id="limitsArrow">&#9660;</span>
+        </button>
+        <div class="limits-body" id="limitsBody">
+          <div class="limits-list">
+            <div class="limit-row"><span class="limit-name">Max pods per node (Kubernetes default)</span><span class="limit-val">~110</span></div>
+            <div class="limit-row"><span class="limit-name">Max service endpoints</span><span class="limit-val">5,000</span></div>
+            <div class="limit-row"><span class="limit-name">etcd value size limit</span><span class="limit-val">1.5 MB</span></div>
+            <div class="limit-row"><span class="limit-name">Max InferencePool size (recommended)</span><span class="limit-val">~64 pods</span></div>
+            <div class="limit-row"><span class="limit-name">vLLM max concurrent sequences / GPU</span><span class="limit-val">256</span></div>
+            <div class="limit-row"><span class="limit-name">Kubernetes scheduler throughput</span><span class="limit-val">~100 pods/sec</span></div>
+            <div class="limit-row"><span class="limit-name">etcd write throughput</span><span class="limit-val">~10,000 writes/sec</span></div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Right column: Metrics -->
+    <div class="metrics" id="metricsPanel"></div>
   </div>
 
 </main>
 
-<!-- ======================================================
-     FOOTER
-     ====================================================== -->
-<footer class="footer">
-  Markell Rawls &middot; Developer Advocate &middot; <a href="https://www.redhat.com" target="_blank" rel="noopener">Red Hat</a>
+<!-- Footer -->
+<footer class="ftr">
+  Markell Rawls &middot; AI Evangelist &middot; <a href="https://www.redhat.com" target="_blank" rel="noopener">Red Hat</a>
 </footer>
 
-<!-- ======================================================
+<!-- ================================================================
      JAVASCRIPT
-     ====================================================== -->
+     ================================================================ -->
 <script>
 (function () {
   'use strict';
 
   /* ==========================================================
-     Constants
+     CONSTANTS
      ========================================================== */
-  const TICK_MS = 150;
-  const SPARKLINE_POINTS = 40;
-  const MAX_QUEUE_BLOCKS = 20;
-  const INITIAL_POD_COUNT = 3;
-  const SCALED_POD_COUNT = 6;
+  var SCALE_LEVELS = [1, 2, 4, 8, 16, 32, 64, 128];
+  var SIM_DT = 80;        // ms per simulation tick
+  var SPARK_N = 50;       // sparkline history length
+  var CIRC = 2 * Math.PI * 24; // score ring circumference (r=24)
 
-  /* Thresholds (load %) */
-  const T_QUEUE   = 30;
-  const T_CACHE   = 45;
-  const T_UNEVEN  = 60;
-  const T_OOM     = 75;
-  const T_CASCADE = 90;
-
-  /* ==========================================================
-     DOM references
-     ========================================================== */
-  const $loadSlider  = document.getElementById('loadSlider');
-  const $loadValue   = document.getElementById('loadValue');
-  const $sliderFill  = document.getElementById('sliderFill');
-  const $podsGrid    = document.getElementById('podsGrid');
-  const $clusterCard = document.getElementById('clusterCard');
-  const $fixPanel    = document.getElementById('fixPanel');
-  const $fixCard     = document.getElementById('fixCard');
-  const $resetBtn    = document.getElementById('resetBtn');
-  const $globalDot   = document.getElementById('globalStatusDot');
-  const $globalText  = document.getElementById('globalStatusText');
-  const $prodBadge   = document.getElementById('productionBadge');
-
-  const metricEls = {
-    ttft:       { value: document.getElementById('ttftValue'),       trend: document.getElementById('ttftTrend'),       card: document.getElementById('metricTTFT'),       sparkline: document.getElementById('ttftSparkline') },
-    throughput: { value: document.getElementById('throughputValue'), trend: document.getElementById('throughputTrend'), card: document.getElementById('metricThroughput'), sparkline: document.getElementById('throughputSparkline') },
-    cache:      { value: document.getElementById('cacheValue'),      trend: document.getElementById('cacheTrend'),      card: document.getElementById('metricCache'),      sparkline: document.getElementById('cacheSparkline') },
-    queue:      { value: document.getElementById('queueValue'),      trend: document.getElementById('queueTrend'),      card: document.getElementById('metricQueue'),      sparkline: document.getElementById('queueSparkline') },
-    pods:       { value: document.getElementById('podsValue'),       trend: document.getElementById('podsTrend'),       card: document.getElementById('metricPods') },
-    restarts:   { value: document.getElementById('restartsValue'),   trend: document.getElementById('restartsTrend'),   card: document.getElementById('metricRestarts') },
+  /* Colors for canvas */
+  var C = {
+    bg:      '#0f1520',
+    border:  '#1a2235',
+    green:   '#22c55e',
+    amber:   '#f59e0b',
+    red:     '#ef4444',
+    blue:    '#3b82f6',
+    cyan:    '#06b6d4',
+    text:    '#e2e8f0',
+    text2:   '#94a3b8',
+    text3:   '#64748b',
+    muted:   '#334155',
+    grid:    'rgba(26,34,53,0.35)',
   };
 
-  const fixBtns = [0,1,2,3,4].map(i => document.getElementById('fix' + i));
+  /* Metric definitions */
+  var METRIC_DEFS = [
+    { key: 'ttft',    label: 'Latency (TTFT)',        unit: 'ms',    base: 140,  badDir: 1,  warnAt: 500,   critAt: 1500  },
+    { key: 'tp',      label: 'Throughput',             unit: 'req/s', base: 80,   badDir: -1, warnAt: 40,    critAt: 15    },
+    { key: 'err',     label: 'Error Rate',             unit: '%',     base: 0.2,  badDir: 1,  warnAt: 5,     critAt: 15    },
+    { key: 'gpu',     label: 'GPU Utilization',        unit: '%',     base: 72,   badDir: 0,  warnAt: null,  critAt: null  },
+    { key: 'net',     label: 'Network Bandwidth',      unit: 'Gbps',  base: 45,   badDir: -1, warnAt: 20,    critAt: 8     },
+    { key: 'sched',   label: 'Scheduler Queue Depth',  unit: '',      base: 2,    badDir: 1,  warnAt: 25,    critAt: 60    },
+  ];
+
+  /* Failure definitions: index = scale level index (0-7) */
+  var FAILURES = [
+    null, // 0: 1 GPU
+    null, // 1: 2 GPUs
+    {     // 2: 4 GPUs -- Network bottleneck
+      title: 'Network Bottleneck',
+      desc: 'Inter-GPU communication saturates available bandwidth. Connections degrade as data-parallel overhead grows across 4 GPUs.',
+      fixes: [
+        { title: 'Add More GPUs',           desc: 'Throw more hardware at the problem to distribute load',                                                   correct: false, feedback: 'More GPUs increase cross-node traffic. The network bottleneck gets worse, not better.' },
+        { title: 'Enable EPP Smart Routing', desc: 'Use llm-d Endpoint Picker to route requests to the optimal pod, minimizing cross-node communication',    correct: true,  feedback: 'EPP intelligently routes requests to minimize cross-node hops, reducing unnecessary east-west traffic by 60%.' },
+        { title: 'Increase Pod Memory',      desc: 'Give each pod more RAM to buffer incoming network data',                                                  correct: false, feedback: 'Memory is not the bottleneck. The network fabric itself is saturated with cross-pod traffic.' },
+      ],
+    },
+    {     // 3: 8 GPUs -- Scheduler contention
+      title: 'Scheduler Contention',
+      desc: 'The Kubernetes scheduler cannot keep up with inference pod scheduling at this scale. Some pods sit idle while others are overloaded.',
+      fixes: [
+        { title: 'Add Pod Priority Classes',       desc: 'Set all inference pods to high priority for preferential scheduling',                                      correct: false, feedback: 'Priority only affects preemption ordering. The scheduler is still the throughput bottleneck for placement.' },
+        { title: 'Deploy Prefix-Aware Scheduling', desc: 'Use llm-d prefix-aware scheduling to route requests based on KV cache locality',                          correct: true,  feedback: 'Prefix-aware scheduling eliminates head-of-line blocking by directing requests to pods with the right context already loaded.' },
+        { title: 'Add More Scheduler Replicas',    desc: 'Run multiple kube-scheduler instances to increase scheduling throughput',                                  correct: false, feedback: 'Multiple schedulers cause split-brain conflicts for GPU resource allocation. You need smarter scheduling, not more schedulers.' },
+      ],
+    },
+    {     // 4: 16 GPUs -- KV cache thrashing
+      title: 'KV Cache Thrashing',
+      desc: 'Cache hit rate has collapsed. Pods do redundant prefill for the same prompts because requests are routed without cache awareness. GPU cycles are wasted.',
+      fixes: [
+        { title: 'Increase KV Cache Size',    desc: 'Allocate more GPU memory to the KV cache per pod',                                                             correct: false, feedback: 'Bigger caches do not help when the same prefix is recomputed on different pods. The routing is the problem.' },
+        { title: 'Enable Cache-Aware Routing', desc: 'Route requests to pods that already have the prompt prefix cached using llm-d EPP',                            correct: true,  feedback: 'Cache-aware routing boosts hit rate from 8% back to 85%+. Redundant prefill compute drops by 10x.' },
+        { title: 'Reduce Max Sequence Length', desc: 'Cap the context window to reduce cache memory consumption',                                                    correct: false, feedback: 'Shorter context reduces model capability without addressing the routing problem at all.' },
+      ],
+    },
+    {     // 5: 32 GPUs -- Thundering herd
+      title: 'Model Loading Thundering Herd',
+      desc: 'Multiple pods try to load the model simultaneously from shared storage. Filesystem I/O bottleneck causes cascading timeouts across the cluster.',
+      fixes: [
+        { title: 'Use Faster Storage (NVMe)',          desc: 'Upgrade to NVMe-backed persistent volumes for faster reads',                                          correct: false, feedback: 'Faster disks help marginally, but 32 pods reading simultaneously still saturates the storage controller.' },
+        { title: 'Stagger with llm-d Rollout Controller', desc: 'Use llm-d model management to stage model loading with health-gate sequencing',                    correct: true,  feedback: 'Staged rollout eliminates the thundering herd. Pods load in sequence with traffic shifted only after health checks pass.' },
+        { title: 'Pre-pull Model Images',               desc: 'Bake model weights into the container image for instant loading',                                     correct: false, feedback: '70B+ model images exceed container registry limits and make rolling updates impractical at this scale.' },
+      ],
+    },
+    {     // 6: 64 GPUs -- etcd limits
+      title: 'etcd Write Limits Reached',
+      desc: 'Control plane is slowing down. Pod status updates from 64 GPUs exceed etcd write throughput (~10K writes/sec), causing scheduling delays and stale routing.',
+      fixes: [
+        { title: 'Increase etcd Cluster Size',     desc: 'Add more etcd members to increase write throughput',                                                       correct: false, feedback: 'More etcd members increase consensus latency. Writes get slower with more members, not faster.' },
+        { title: 'Deploy llm-d InferencePool CRD', desc: 'Use InferencePool to batch endpoint management and reduce per-pod control plane writes',                   correct: true,  feedback: 'InferencePool batches status updates, reducing etcd writes by 10x while maintaining accurate endpoint routing tables.' },
+        { title: 'Reduce Health Check Frequency',  desc: 'Set pod probes to run less often to reduce API server load',                                               correct: false, feedback: 'Less frequent health checks mean stale routing decisions. Broken pods keep receiving traffic for too long.' },
+      ],
+    },
+    {     // 7: 128 GPUs -- Cascade failure
+      title: 'Cascade Failure',
+      desc: 'All previous issues compound. Scheduling delays + stale caches + thundering herd + etcd pressure create a catastrophic cascading collapse.',
+      fixes: [
+        { title: 'Just Add More Pods',       desc: 'Scale to 256 GPUs to absorb the failures across more hardware',                                                  correct: false, feedback: 'Doubling GPUs doubles every failure mode. The cascade accelerates, it does not slow down.' },
+        { title: 'Deploy Full llm-d Stack',  desc: 'EPP + cache-aware routing + InferencePool + staged rollout: the complete llm-d production stack',                 correct: true,  feedback: 'The full llm-d stack resolves all failure modes simultaneously. Each layer removes a cascade precondition. Production-ready at 128 GPUs.' },
+        { title: 'Rolling Restart All Pods', desc: 'Clear all state with a full rolling restart of the inference fleet',                                              correct: false, feedback: 'Mass restart triggers thundering herd all over again, and etcd chokes on the surge of pod lifecycle events.' },
+      ],
+    },
+  ];
 
   /* ==========================================================
-     State
+     DOM REFS
      ========================================================== */
-  let load = 0;              // 0-100
-  let targetLoad = 0;
-  let pods = [];
-  let totalPodSlots = INITIAL_POD_COUNT;
-  let restartCount = 0;
-  let tickCount = 0;
-
-  /* Fixes applied */
-  const fixes = [false, false, false, false, false];
-
-  /* Animated metric values */
-  const animMetrics = {
-    ttft: 180,
-    throughput: 120,
-    cache: 82,
-    queue: 4,
-  };
-
-  /* Sparkline histories */
-  const sparkHistory = {
-    ttft: [],
-    throughput: [],
-    cache: [],
-    queue: [],
-  };
+  var canvas     = document.getElementById('clusterCanvas');
+  var ctx        = canvas.getContext('2d');
+  var $gpuCount  = document.getElementById('gpuCount');
+  var $scaleUp   = document.getElementById('scaleUpBtn');
+  var $scaleDown = document.getElementById('scaleDownBtn');
+  var $reset     = document.getElementById('resetBtn');
+  var $llmdToggle = document.getElementById('llmdToggle');
+  var $toggleOn  = document.getElementById('toggleOn');
+  var $toggleOff = document.getElementById('toggleOff');
+  var $failBanner = document.getElementById('failBanner');
+  var $failTitle = document.getElementById('failTitle');
+  var $failDesc  = document.getElementById('failDesc');
+  var $fixPanel  = document.getElementById('fixPanel');
+  var $fixPrompt = document.getElementById('fixPrompt');
+  var $fixGrid   = document.getElementById('fixGrid');
+  var $fixResult = document.getElementById('fixResult');
+  var $prodBadge = document.getElementById('prodBadge');
+  var $scoreVal  = document.getElementById('scoreVal');
+  var $scoreArc  = document.getElementById('scoreArc');
+  var $sDot      = document.getElementById('sDot');
+  var $sText     = document.getElementById('sText');
+  var $canvasTitle = document.getElementById('canvasTitle');
+  var $metricsPanel = document.getElementById('metricsPanel');
+  var $limitsToggle = document.getElementById('limitsToggle');
+  var $limitsBody = document.getElementById('limitsBody');
+  var $limitsArrow = document.getElementById('limitsArrow');
 
   /* ==========================================================
-     Pod model
+     STATE
      ========================================================== */
-  function createPod(index) {
-    return {
-      index: index,
-      name: 'vllm-pod-' + index,
-      cpu: 15 + Math.random() * 10,
-      mem: 20 + Math.random() * 10,
-      gpu: 12 + Math.random() * 8,
-      queue: 1 + Math.floor(Math.random() * 3),
-      kvCache: 10 + Math.random() * 15,
-      healthy: true,
-      down: false,
-      restarting: false,
-      restartTimer: 0,
-      cacheMiss: false,
-      cacheHit: false,
-    };
-  }
+  var scaleIdx    = 0;
+  var gpuCount    = 1;
+  var llmdOn      = false;
+  var score       = 100;
+  var dispScore   = 100;
+  var fixApplied  = false;
+  var fixesApplied = {};   // scaleIdx -> true
+  var tickCount   = 0;
 
-  function initPods() {
-    pods = [];
-    for (let i = 0; i < INITIAL_POD_COUNT; i++) {
-      pods.push(createPod(i));
-    }
-    totalPodSlots = INITIAL_POD_COUNT;
-  }
+  /* Pod state */
+  var pods = [];
+  var particles = [];
+
+  /* Metric values */
+  var mVals = {};
+  var mDisp = {};
+  var mHist = {};
+  var sparkCanvases = {};
+
+  /* Canvas dimensions */
+  var cW = 960, cH = 480, dpr = 1;
 
   /* ==========================================================
-     Render pods DOM
-     ========================================================== */
-  function renderPodsDOM() {
-    $podsGrid.innerHTML = '';
-    /* Adjust grid columns */
-    const cols = totalPodSlots <= 3 ? 3 : (totalPodSlots <= 6 ? 3 : 4);
-    $podsGrid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-
-    pods.forEach(function (pod, idx) {
-      const el = document.createElement('div');
-      el.className = 'pod-card';
-      el.id = 'pod-' + pod.index;
-      el.setAttribute('data-idx', idx);
-
-      /* Queue blocks HTML */
-      let queueBlocksHTML = '';
-      for (let b = 0; b < MAX_QUEUE_BLOCKS; b++) {
-        queueBlocksHTML += '<div class="queue-block" data-qb="' + b + '"></div>';
-      }
-
-      el.innerHTML =
-        '<div class="pod-header">' +
-          '<span class="pod-name">' + pod.name + '</span>' +
-          '<div class="pod-status-dot"></div>' +
-        '</div>' +
-        '<div class="pod-bars">' +
-          '<div class="bar-row"><span class="bar-label">CPU</span><div class="bar-track"><div class="bar-fill" data-bar="cpu"></div></div><span class="bar-value" data-bv="cpu">0%</span></div>' +
-          '<div class="bar-row"><span class="bar-label">Memory</span><div class="bar-track"><div class="bar-fill" data-bar="mem"></div></div><span class="bar-value" data-bv="mem">0%</span></div>' +
-          '<div class="bar-row"><span class="bar-label">GPU</span><div class="bar-track"><div class="bar-fill" data-bar="gpu"></div></div><span class="bar-value" data-bv="gpu">0%</span></div>' +
-          '<div class="bar-row"><span class="bar-label">KV Cache</span><div class="bar-track"><div class="bar-fill" data-bar="kv"></div></div><span class="bar-value" data-bv="kv">0%</span></div>' +
-          '<div class="queue-row"><span class="queue-label">Queue</span><div class="queue-blocks">' + queueBlocksHTML + '</div><span class="queue-value" data-qv>0</span></div>' +
-        '</div>' +
-        '<div class="pod-down-label"><span class="pod-down-text">OOM</span><span class="pod-down-sublabel">Restarting...</span></div>' +
-        '<div class="cache-flash"></div>' +
-        '<div class="timeout-counter">0 timeouts</div>';
-
-      $podsGrid.appendChild(el);
-    });
-  }
-
-  /* ==========================================================
-     Simulation tick
+     UTILITIES
      ========================================================== */
   function lerp(a, b, t) { return a + (b - a) * t; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-  function jitter(base, pct) { return base * (1 + (Math.random() - 0.5) * 2 * pct); }
+  function jitter(v, pct) { return v * (1 + (Math.random() - 0.5) * 2 * pct); }
 
+  function hexAlpha(hex, a) {
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  /* ==========================================================
+     INIT METRICS
+     ========================================================== */
+  function initMetrics() {
+    METRIC_DEFS.forEach(function (d) {
+      mVals[d.key] = d.base;
+      mDisp[d.key] = d.base;
+      mHist[d.key] = [];
+      for (var i = 0; i < SPARK_N; i++) {
+        mHist[d.key].push(d.base + (Math.random() - 0.5) * d.base * 0.06);
+      }
+    });
+  }
+
+  /* Build metrics DOM */
+  function buildMetricsDOM() {
+    $metricsPanel.innerHTML = '';
+    METRIC_DEFS.forEach(function (d) {
+      var card = document.createElement('div');
+      card.className = 'm-card';
+      card.id = 'mc-' + d.key;
+      card.innerHTML =
+        '<div class="m-top">' +
+          '<span class="m-label">' + d.label + '</span>' +
+          '<span class="m-trend flat" id="mt-' + d.key + '">--</span>' +
+        '</div>' +
+        '<div class="m-row">' +
+          '<span class="m-val" id="mv-' + d.key + '">' + formatMetric(d.key, d.base) + '</span>' +
+          '<span class="m-unit">' + d.unit + '</span>' +
+        '</div>' +
+        '<div class="spark"><canvas id="sp-' + d.key + '" width="260" height="20"></canvas></div>';
+      $metricsPanel.appendChild(card);
+    });
+    METRIC_DEFS.forEach(function (d) {
+      sparkCanvases[d.key] = document.getElementById('sp-' + d.key);
+    });
+  }
+
+  function formatMetric(key, val) {
+    if (key === 'err') return val < 1 ? val.toFixed(1) : Math.round(val);
+    if (key === 'net') return val < 10 ? val.toFixed(1) : Math.round(val);
+    return Math.round(val);
+  }
+
+  /* ==========================================================
+     POD MODEL
+     ========================================================== */
+  function makePod(i) {
+    return {
+      id: i,
+      x: 0, y: 0, w: 0, h: 0,
+      cpu: 18 + Math.random() * 12,
+      gpu: 60 + Math.random() * 15,
+      mem: 25 + Math.random() * 12,
+      kv:  15 + Math.random() * 15,
+      queue: 1 + Math.random() * 2,
+      health: 1,         // 1=healthy, 0.5=warn, 0=critical, -1=down
+      targetHealth: 1,
+      down: false,
+      restartT: 0,
+      glowPhase: Math.random() * Math.PI * 2,
+      crackProgress: 0,  // 0=none, 1=fully cracked
+    };
+  }
+
+  function rebuildPods(n) {
+    pods = [];
+    for (var i = 0; i < n; i++) pods.push(makePod(i));
+    particles = [];
+    layoutPods();
+  }
+
+  function layoutPods() {
+    var n = pods.length;
+    if (n === 0) return;
+    var pad = 16, gap;
+    var cols, rows;
+
+    if (n <= 2)       { cols = n; rows = 1; gap = 14; }
+    else if (n <= 4)  { cols = 2; rows = 2; gap = 14; }
+    else if (n <= 8)  { cols = 4; rows = 2; gap = 12; }
+    else if (n <= 16) { cols = 4; rows = 4; gap = 10; }
+    else if (n <= 32) { cols = 8; rows = 4; gap = 8; }
+    else if (n <= 64) { cols = 8; rows = 8; gap = 5; }
+    else              { cols = 16; rows = 8; gap = 4; }
+
+    var pw = (cW - pad * 2 - gap * (cols - 1)) / cols;
+    var ph = (cH - pad * 2 - gap * (rows - 1)) / rows;
+    pw = Math.min(pw, 180);
+    ph = Math.min(ph, 100);
+
+    var totalW = cols * pw + (cols - 1) * gap;
+    var totalH = rows * ph + (rows - 1) * gap;
+    var ox = (cW - totalW) / 2;
+    var oy = (cH - totalH) / 2;
+
+    pods.forEach(function (p, i) {
+      p.x = ox + (i % cols) * (pw + gap);
+      p.y = oy + Math.floor(i / cols) * (ph + gap);
+      p.w = pw;
+      p.h = ph;
+    });
+  }
+
+  /* ==========================================================
+     SIMULATION
+     ========================================================== */
   function simulate() {
     tickCount++;
+    var failure = FAILURES[scaleIdx];
+    var broken = failure && !fixesApplied[scaleIdx] && !llmdOn;
+    var severity = broken ? clamp((scaleIdx - 1) * 0.17, 0, 1) : 0;
 
-    /* Smooth load towards target */
-    load = lerp(load, targetLoad, 0.08);
+    /* --- Compute target metrics --- */
+    var n = gpuCount;
+    var sqrtN = Math.sqrt(n);
+    var tTTFT, tTP, tErr, tGPU, tNet, tSched;
 
-    const activePods = pods.filter(function (p) { return !p.down; });
-    const activePodCount = activePods.length;
-    const totalPodCount = pods.length;
-
-    /* ---- Compute target metrics based on load & fixes ---- */
-    let tTTFT, tThroughput, tCache, tQueue;
-
-    /* Base healthy values */
-    const baseActivePods = activePodCount || 1;
-    const baseTTFT = 180;
-    const baseThroughput = 40 * baseActivePods;
-    const baseCache = 82;
-    const baseQueue = 2 + load * 0.05;
-
-    tTTFT = baseTTFT;
-    tThroughput = baseThroughput;
-    tCache = baseCache;
-    tQueue = baseQueue;
-
-    /* ---- Phase 2: Things Break ---- */
-    const queueBreaking = load >= T_QUEUE && !fixes[0];
-    const cacheBreaking = load >= T_CACHE && !fixes[1];
-    const unevenBreaking = load >= T_UNEVEN && !fixes[0];
-    const oomBreaking = load >= T_OOM && !fixes[3];
-    const cascadeBreaking = load >= T_CASCADE && !fixes[4];
-
-    /* Queue explosion */
-    if (queueBreaking) {
-      const severity = clamp((load - T_QUEUE) / (100 - T_QUEUE), 0, 1);
-      tQueue = baseQueue + severity * 180;
-      tTTFT = baseTTFT + severity * 2200;
+    if (broken) {
+      // Degraded metrics based on specific failure
+      switch (scaleIdx) {
+        case 2: // network
+          tTTFT  = 140 + severity * 500 + Math.random() * 50;
+          tTP    = 80 * sqrtN * (1 - severity * 0.45);
+          tErr   = 0.2 + severity * 8;
+          tGPU   = 72 - severity * 20;
+          tNet   = 45 * (1 - severity * 0.7);
+          tSched = 2 + severity * 10;
+          break;
+        case 3: // scheduler
+          tTTFT  = 140 + severity * 900;
+          tTP    = 80 * sqrtN * (1 - severity * 0.6);
+          tErr   = 0.2 + severity * 12;
+          tGPU   = 72 - severity * 35; // some pods idle
+          tNet   = 45 - severity * 15;
+          tSched = 2 + severity * 55;
+          break;
+        case 4: // KV cache
+          tTTFT  = 140 + severity * 1400;
+          tTP    = 80 * sqrtN * (1 - severity * 0.65);
+          tErr   = 0.2 + severity * 15;
+          tGPU   = 92 + severity * 6; // maxed from redundant prefill
+          tNet   = 45 - severity * 18;
+          tSched = 2 + severity * 35;
+          break;
+        case 5: // thundering herd
+          tTTFT  = 140 + severity * 2200;
+          tTP    = 80 * sqrtN * (1 - severity * 0.8);
+          tErr   = 0.2 + severity * 28;
+          tGPU   = 72 - severity * 55; // pods not loaded
+          tNet   = 45 - severity * 30;
+          tSched = 2 + severity * 70;
+          break;
+        case 6: // etcd
+          tTTFT  = 140 + severity * 3200;
+          tTP    = 80 * sqrtN * (1 - severity * 0.85);
+          tErr   = 0.2 + severity * 38;
+          tGPU   = 72 - severity * 42;
+          tNet   = 45 - severity * 28;
+          tSched = 2 + severity * 95;
+          break;
+        case 7: // cascade
+          tTTFT  = 140 + severity * 5000;
+          tTP    = Math.max(3, 80 * sqrtN * (1 - severity * 0.95));
+          tErr   = 0.2 + severity * 60;
+          tGPU   = 72 - severity * 60;
+          tNet   = Math.max(2, 45 - severity * 40);
+          tSched = 2 + severity * 120;
+          break;
+        default:
+          tTTFT = 140; tTP = 80 * sqrtN; tErr = 0.2; tGPU = 72; tNet = 45; tSched = 2;
+      }
+      // Accumulate unfixed previous failures
+      for (var fi = 2; fi < scaleIdx; fi++) {
+        if (FAILURES[fi] && !fixesApplied[fi]) {
+          tTTFT *= 1.1;
+          tTP *= 0.92;
+          tErr += 2;
+        }
+      }
+    } else if (llmdOn && scaleIdx >= 2) {
+      // llm-d optimized
+      tTTFT  = 95 + n * 0.2 + Math.random() * 10;
+      tTP    = 95 * sqrtN + Math.random() * 5;
+      tErr   = 0.08 + Math.random() * 0.05;
+      tGPU   = 85 + Math.random() * 5;
+      tNet   = 52 + Math.random() * 3;
+      tSched = 1 + Math.random() * 0.5;
+    } else {
+      // Healthy baseline
+      tTTFT  = 140 + Math.random() * 15;
+      tTP    = 80 * sqrtN + Math.random() * 8;
+      tErr   = 0.2 + Math.random() * 0.1;
+      tGPU   = 72 + Math.random() * 5;
+      tNet   = 45 + Math.random() * 3;
+      tSched = 2 + Math.random() * 1;
     }
 
-    /* Cache miss storm */
-    if (cacheBreaking) {
-      const severity = clamp((load - T_CACHE) / (100 - T_CACHE), 0, 1);
-      tCache = baseCache - severity * 78;  // drops to ~4%
-      tTTFT += severity * 800;
+    // Clamp and jitter
+    tTTFT  = Math.max(50, jitter(tTTFT, 0.03));
+    tTP    = Math.max(1, jitter(tTP, 0.02));
+    tErr   = Math.max(0, jitter(tErr, 0.04));
+    tGPU   = clamp(jitter(tGPU, 0.02), 0, 100);
+    tNet   = Math.max(0.5, jitter(tNet, 0.02));
+    tSched = Math.max(0, jitter(tSched, 0.03));
+
+    // Lerp current values
+    mVals.ttft  = lerp(mVals.ttft,  tTTFT,  0.06);
+    mVals.tp    = lerp(mVals.tp,    tTP,    0.06);
+    mVals.err   = lerp(mVals.err,   tErr,   0.06);
+    mVals.gpu   = lerp(mVals.gpu,   tGPU,   0.06);
+    mVals.net   = lerp(mVals.net,   tNet,   0.06);
+    mVals.sched = lerp(mVals.sched, tSched, 0.06);
+
+    /* --- Update pod states --- */
+    updatePodStates(broken, severity);
+
+    /* --- Sparkline history --- */
+    if (tickCount % 2 === 0) {
+      METRIC_DEFS.forEach(function (d) {
+        mHist[d.key].push(mVals[d.key]);
+        if (mHist[d.key].length > SPARK_N) mHist[d.key].shift();
+      });
     }
 
-    /* Uneven load -- handled per-pod below */
+    /* --- Score --- */
+    computeScore(broken);
+  }
 
-    /* OOM -- handled per-pod below, affects throughput */
-    if (oomBreaking && activePodCount < totalPodCount) {
-      tThroughput *= activePodCount / totalPodCount;
-    }
-
-    /* Cascade -- severe throughput loss */
-    if (cascadeBreaking && activePodCount <= 1) {
-      tThroughput = jitter(8, 0.3);
-      tTTFT = jitter(5000, 0.15);
-    }
-
-    /* ---- Phase 3: Fixes improve metrics ---- */
-    if (fixes[0]) { // EPP
-      tQueue = clamp(tQueue, 0, 12 + load * 0.08);
-      tTTFT = Math.min(tTTFT, baseTTFT + load * 3);
-    }
-    if (fixes[1]) { // Cache-aware
-      tCache = clamp(85 + Math.random() * 5, 0, 95);
-      tTTFT = Math.min(tTTFT, 300 + load * 1.5);
-    }
-    if (fixes[2]) { // Horizontal scaling
-      tThroughput = 40 * activePodCount;
-    }
-    if (fixes[3]) { // Health-aware
-      // drain unhealthy pods -- recovery handled in pod loop
-    }
-    if (fixes[4]) { // Full stack
-      tTTFT = Math.min(tTTFT, 150 + load * 0.8);
-      tThroughput = Math.max(tThroughput, 35 * activePodCount);
-      tCache = Math.max(tCache, 90);
-      tQueue = Math.min(tQueue, 6 + load * 0.04);
-    }
-
-    /* Lerp animated metrics */
-    animMetrics.ttft       = lerp(animMetrics.ttft,       tTTFT,       0.06);
-    animMetrics.throughput  = lerp(animMetrics.throughput,  tThroughput,  0.06);
-    animMetrics.cache       = lerp(animMetrics.cache,       tCache,       0.06);
-    animMetrics.queue       = lerp(animMetrics.queue,       tQueue,       0.06);
-
-    /* ---- Update each pod ---- */
-    pods.forEach(function (pod, idx) {
-      /* If restarting, count down */
-      if (pod.restarting) {
-        pod.restartTimer--;
-        if (pod.restartTimer <= 0) {
-          pod.down = false;
-          pod.restarting = false;
-          pod.healthy = true;
-          pod.cpu = 15;
-          pod.mem = 20;
-          pod.gpu = 12;
-          pod.queue = 2;
-          pod.kvCache = 10;
+  function updatePodStates(broken, severity) {
+    var n = pods.length;
+    pods.forEach(function (p, i) {
+      if (p.down) {
+        p.restartT--;
+        if (p.restartT <= 0) {
+          p.down = false;
+          p.health = 0.5;
+          p.targetHealth = 1;
+          p.cpu = 18; p.gpu = 60; p.mem = 25; p.kv = 15; p.queue = 1;
+          p.crackProgress = 0;
         }
         return;
       }
-      if (pod.down) return;
 
-      /* Base pod load */
-      let podLoad = load;
-
-      /* Uneven distribution */
-      if (unevenBreaking && !fixes[0]) {
-        /* Round-robin imbalance: first pod gets much more */
-        const severity = clamp((load - T_UNEVEN) / (100 - T_UNEVEN), 0, 1);
-        if (idx === 0) podLoad = load + severity * 35;
-        else if (idx === 1) podLoad = load + severity * 15;
-        else podLoad = load - severity * 25;
-      }
-
-      /* If fixes[0] (EPP), balance the load */
-      if (fixes[0]) {
-        podLoad = load; // balanced
-      }
-
-      podLoad = clamp(podLoad, 0, 120);
-
-      /* CPU, GPU, Mem targets */
-      let tCPU = 15 + podLoad * 0.65 + jitter(0, 2);
-      let tGPU = 12 + podLoad * 0.7 + jitter(0, 2);
-      let tMem = 20 + podLoad * 0.55 + jitter(0, 1);
-      let tKV  = 10 + podLoad * 0.6 + jitter(0, 2);
-      let tQ   = 1 + podLoad * 0.15;
-
-      /* Cache miss storm: GPU maxed doing redundant prefill */
-      if (cacheBreaking) {
-        const severity = clamp((load - T_CACHE) / (100 - T_CACHE), 0, 1);
-        tGPU = Math.min(98, tGPU + severity * 40);
-      }
-      if (fixes[1]) { // cache-aware fix: GPU drops
-        tGPU = Math.min(tGPU, 30 + podLoad * 0.4);
-      }
-
-      /* Queue explosion */
-      if (queueBreaking) {
-        const severity = clamp((load - T_QUEUE) / (100 - T_QUEUE), 0, 1);
-        tQ = tQ + severity * 18;
-      }
-      if (fixes[0]) {
-        tQ = Math.min(tQ, 3 + podLoad * 0.05);
-      }
-
-      /* OOM pressure */
-      if (oomBreaking) {
-        const severity = clamp((load - T_OOM) / (100 - T_OOM), 0, 1);
-        tMem = Math.min(100, tMem + severity * 50);
-        tKV = Math.min(100, tKV + severity * 40);
-
-        /* OOM kill if memory reaches 98%+ on overloaded pods */
-        if (pod.mem > 96 && !fixes[3] && Math.random() < 0.04) {
-          pod.down = true;
-          pod.restarting = true;
-          pod.healthy = false;
-          pod.restartTimer = 30 + Math.floor(Math.random() * 20); // ticks
-          restartCount++;
-          return;
+      if (!broken) {
+        p.targetHealth = 1;
+        var baseGpu = llmdOn ? 82 : 65;
+        p.cpu = lerp(p.cpu, 18 + Math.random() * 12, 0.04);
+        p.gpu = lerp(p.gpu, baseGpu + Math.random() * 10, 0.04);
+        p.mem = lerp(p.mem, 25 + Math.random() * 12, 0.04);
+        p.kv  = lerp(p.kv,  (llmdOn ? 12 : 20) + Math.random() * 10, 0.04);
+        p.queue = lerp(p.queue, 1 + Math.random() * 2, 0.05);
+        p.crackProgress = lerp(p.crackProgress, 0, 0.05);
+      } else {
+        // Apply failure-specific stress patterns
+        switch (scaleIdx) {
+          case 2: // network -- some pods stressed
+            p.targetHealth = i < n * 0.3 ? 0.4 : 0.8;
+            p.cpu = lerp(p.cpu, 35 + severity * 30, 0.04);
+            p.gpu = lerp(p.gpu, 50 + severity * 15, 0.04);
+            p.mem = lerp(p.mem, 40 + severity * 20, 0.04);
+            break;
+          case 3: // scheduler -- uneven: some overloaded, some idle
+            if (i % 3 === 0) {
+              p.targetHealth = 0.1;
+              p.cpu = lerp(p.cpu, 88 + Math.random() * 8, 0.04);
+              p.gpu = lerp(p.gpu, 92 + Math.random() * 6, 0.04);
+              p.queue = lerp(p.queue, 12 + severity * 8, 0.05);
+            } else if (i % 3 === 1) {
+              p.targetHealth = 0.9;
+              p.cpu = lerp(p.cpu, 8 + Math.random() * 5, 0.04);
+              p.gpu = lerp(p.gpu, 10 + Math.random() * 8, 0.04);
+              p.queue = lerp(p.queue, 0.5, 0.05);
+            } else {
+              p.targetHealth = 0.55;
+              p.cpu = lerp(p.cpu, 50 + Math.random() * 20, 0.04);
+              p.gpu = lerp(p.gpu, 55 + Math.random() * 15, 0.04);
+            }
+            break;
+          case 4: // KV cache -- GPU maxed, cache thrashing
+            p.targetHealth = 0.4;
+            p.gpu = lerp(p.gpu, 93 + Math.random() * 5, 0.04);
+            p.kv  = lerp(p.kv, 88 + Math.random() * 10, 0.04);
+            p.cpu = lerp(p.cpu, 55 + Math.random() * 25, 0.04);
+            break;
+          case 5: // thundering herd -- some pods down
+            if (i < n * 0.4) {
+              p.targetHealth = -1;
+              p.crackProgress = Math.min(1, p.crackProgress + 0.015);
+              if (!p.down && p.crackProgress > 0.8 && Math.random() < 0.05) {
+                p.down = true; p.restartT = 35 + Math.floor(Math.random() * 25);
+              }
+            } else {
+              p.targetHealth = 0.45;
+              p.cpu = lerp(p.cpu, 65 + Math.random() * 25, 0.04);
+            }
+            break;
+          case 6: // etcd
+            p.targetHealth = Math.random() < 0.2 ? 0.1 : 0.45;
+            p.cpu = lerp(p.cpu, 45 + Math.random() * 30, 0.04);
+            p.gpu = lerp(p.gpu, 30 + Math.random() * 25, 0.04);
+            break;
+          case 7: // cascade
+            if (i < n * 0.45) {
+              p.targetHealth = -1;
+              p.crackProgress = Math.min(1, p.crackProgress + 0.012);
+              if (!p.down && p.crackProgress > 0.7 && Math.random() < 0.04) {
+                p.down = true; p.restartT = 45 + Math.floor(Math.random() * 30);
+              }
+            } else if (i < n * 0.7) {
+              p.targetHealth = 0.1;
+              p.cpu = lerp(p.cpu, 85 + Math.random() * 12, 0.04);
+              p.mem = lerp(p.mem, 88 + Math.random() * 10, 0.04);
+            } else {
+              p.targetHealth = 0.4;
+            }
+            break;
         }
       }
-      if (fixes[3]) { // health-aware: protect memory
-        tMem = Math.min(tMem, 60 + podLoad * 0.2);
-        tKV = Math.min(tKV, 50 + podLoad * 0.3);
-      }
 
-      /* Cascade: kill pods aggressively */
-      if (cascadeBreaking && !fixes[4]) {
-        if (pod.cpu > 88 && Math.random() < 0.06) {
-          pod.down = true;
-          pod.restarting = true;
-          pod.healthy = false;
-          pod.restartTimer = 40 + Math.floor(Math.random() * 30);
-          restartCount++;
-          return;
-        }
-      }
-
-      /* Full stack fix: everything calm */
-      if (fixes[4]) {
-        tCPU = Math.min(tCPU, 30 + podLoad * 0.35);
-        tMem = Math.min(tMem, 35 + podLoad * 0.25);
-        tGPU = Math.min(tGPU, 25 + podLoad * 0.35);
-        tKV  = Math.min(tKV,  20 + podLoad * 0.3);
-        tQ   = Math.min(tQ,   2 + podLoad * 0.03);
-      }
-
-      /* Lerp pod values */
-      pod.cpu = lerp(pod.cpu, clamp(tCPU, 5, 100), 0.08);
-      pod.mem = lerp(pod.mem, clamp(tMem, 10, 100), 0.06);
-      pod.gpu = lerp(pod.gpu, clamp(tGPU, 5, 100), 0.08);
-      pod.kvCache = lerp(pod.kvCache, clamp(tKV, 5, 100), 0.06);
-      pod.queue = lerp(pod.queue, clamp(tQ, 0, MAX_QUEUE_BLOCKS), 0.1);
-
-      /* Health state */
-      if (pod.cpu > 85 || pod.mem > 88) {
-        pod.healthy = false;
-      } else if (pod.cpu < 70 && pod.mem < 75) {
-        pod.healthy = true;
-      }
-
-      /* Cache flash */
-      pod.cacheMiss = cacheBreaking && !fixes[1] && Math.random() < 0.15;
-      pod.cacheHit = fixes[1] && Math.random() < 0.1;
+      // Smooth health
+      p.health = lerp(p.health, p.targetHealth, 0.04);
+      p.glowPhase += 0.06;
     });
+  }
 
-    /* ---- Reconcile if health-aware routing is enabled ---- */
-    if (fixes[3]) {
-      pods.forEach(function (pod) {
-        if (pod.down && pod.restarting) {
-          /* Speed up restart */
-          pod.restartTimer = Math.max(0, pod.restartTimer - 1);
-        }
-      });
+  function computeScore(broken) {
+    var s = 100;
+    if (broken) {
+      // Deduct for current unfixed failure
+      s -= (scaleIdx - 1) * 8;
+      // Deduct for any previous unfixed failures
+      for (var i = 2; i < scaleIdx; i++) {
+        if (FAILURES[i] && !fixesApplied[i]) s -= 5;
+      }
     }
-
-    /* ---- Record sparkline data ---- */
-    if (tickCount % 3 === 0) {
-      pushSparkline('ttft', animMetrics.ttft);
-      pushSparkline('throughput', animMetrics.throughput);
-      pushSparkline('cache', animMetrics.cache);
-      pushSparkline('queue', animMetrics.queue);
-    }
-
-    /* ---- Update DOM ---- */
-    updatePodsDOM();
-    updateMetricsDOM();
-    updateGlobalStatus();
-    updateFixPanel();
-    updateSliderVisual();
+    if (llmdOn && scaleIdx >= 2) s = Math.min(100, s + 10);
+    score = clamp(s, 0, 100);
   }
 
   /* ==========================================================
-     Sparkline
+     PARTICLES
      ========================================================== */
-  function pushSparkline(key, val) {
-    sparkHistory[key].push(val);
-    if (sparkHistory[key].length > SPARKLINE_POINTS) {
-      sparkHistory[key].shift();
+  function spawnParticles() {
+    if (pods.length < 2) return;
+    var broken = FAILURES[scaleIdx] && !fixesApplied[scaleIdx] && !llmdOn;
+    var rate = broken ? 0.12 : 0.25;
+    if (Math.random() > rate) return;
+
+    var a = Math.floor(Math.random() * pods.length);
+    var b = Math.floor(Math.random() * pods.length);
+    if (a === b) b = (a + 1) % pods.length;
+    if (pods[a].down || pods[b].down) return;
+
+    // Only connect nearby pods in large clusters
+    if (pods.length > 16) {
+      var dx = pods[a].x - pods[b].x;
+      var dy = pods[a].y - pods[b].y;
+      if (Math.sqrt(dx * dx + dy * dy) > (pods.length > 32 ? 150 : 250)) return;
+    }
+
+    particles.push({
+      ax: pods[a].x + pods[a].w / 2,
+      ay: pods[a].y + pods[a].h / 2,
+      bx: pods[b].x + pods[b].w / 2,
+      by: pods[b].y + pods[b].h / 2,
+      t: 0,
+      speed: broken ? 0.008 + Math.random() * 0.008 : 0.015 + Math.random() * 0.012,
+      color: broken ? C.amber : C.blue,
+    });
+    if (particles.length > 60) particles.splice(0, 15);
+  }
+
+  function updateParticles() {
+    for (var i = particles.length - 1; i >= 0; i--) {
+      particles[i].t += particles[i].speed;
+      if (particles[i].t >= 1) particles.splice(i, 1);
     }
   }
 
-  function renderSparkline(svgEl, data, invertColor) {
-    if (!svgEl || data.length < 2) return;
+  /* ==========================================================
+     CANVAS RENDERING
+     ========================================================== */
+  function resizeCanvas() {
+    var card = canvas.parentElement;
+    var rect = card.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    cW = rect.width;
+    cH = Math.max(300, Math.min(500, cW * 0.5));
+    canvas.width = cW * dpr;
+    canvas.height = cH * dpr;
+    canvas.style.width = cW + 'px';
+    canvas.style.height = cH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layoutPods();
+  }
 
-    const w = 280;
-    const h = 24;
-    const min = Math.min.apply(null, data);
-    const max = Math.max.apply(null, data);
-    const range = max - min || 1;
+  function drawCanvas(time) {
+    ctx.clearRect(0, 0, cW, cH);
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, cW, cH);
 
-    let pathD = '';
-    let areaD = 'M0,' + h;
+    // Grid
+    ctx.strokeStyle = C.grid;
+    ctx.lineWidth = 0.5;
+    var gs = 35;
+    for (var gx = 0; gx < cW; gx += gs) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, cH); ctx.stroke();
+    }
+    for (var gy = 0; gy < cH; gy += gs) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(cW, gy); ctx.stroke();
+    }
 
-    data.forEach(function (val, i) {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - ((val - min) / range) * (h - 2) - 1;
-      if (i === 0) {
-        pathD += 'M' + x + ',' + y;
-        areaD += ' L' + x + ',' + y;
-      } else {
-        pathD += ' L' + x + ',' + y;
-        areaD += ' L' + x + ',' + y;
+    drawConnections(time);
+    drawParticlesCanvas();
+    pods.forEach(function (p) { drawPod(p, time); });
+  }
+
+  function drawConnections(time) {
+    if (pods.length < 2) return;
+    var broken = FAILURES[scaleIdx] && !fixesApplied[scaleIdx] && !llmdOn;
+    ctx.lineWidth = 1;
+
+    for (var i = 0; i < pods.length; i++) {
+      for (var j = i + 1; j < pods.length; j++) {
+        var pi = pods[i], pj = pods[j];
+        var dx = (pi.x + pi.w / 2) - (pj.x + pj.w / 2);
+        var dy = (pi.y + pi.h / 2) - (pj.y + pj.h / 2);
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var maxDist = pods.length <= 8 ? 500 : (pods.length <= 32 ? 200 : 120);
+        if (dist > maxDist) continue;
+
+        var anyDown = pi.down || pj.down;
+        var bothDown = pi.down && pj.down;
+        var alpha;
+
+        if (bothDown) {
+          ctx.strokeStyle = hexAlpha(C.muted, 0.15);
+        } else if (anyDown) {
+          ctx.strokeStyle = hexAlpha(C.red, 0.12);
+        } else if (broken) {
+          alpha = 0.1 + Math.sin(time * 0.002 + i + j) * 0.05;
+          ctx.strokeStyle = hexAlpha(C.amber, alpha);
+        } else {
+          alpha = 0.06 + Math.sin(time * 0.0015 + i + j) * 0.03;
+          ctx.strokeStyle = hexAlpha(llmdOn ? C.green : C.blue, alpha);
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(pi.x + pi.w / 2, pi.y + pi.h / 2);
+        ctx.lineTo(pj.x + pj.w / 2, pj.y + pj.h / 2);
+        ctx.stroke();
       }
+    }
+  }
+
+  function drawParticlesCanvas() {
+    particles.forEach(function (p) {
+      var x = p.ax + (p.bx - p.ax) * p.t;
+      var y = p.ay + (p.by - p.ay) * p.t;
+      var alpha = p.t < 0.1 ? p.t * 10 : (p.t > 0.9 ? (1 - p.t) * 10 : 1);
+
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = hexAlpha(p.color, alpha * 0.8);
+      ctx.fill();
+
+      // Glow
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = hexAlpha(p.color, alpha * 0.12);
+      ctx.fill();
     });
-    areaD += ' L' + w + ',' + h + ' Z';
+  }
 
-    /* Determine color class */
-    const lastVal = data[data.length - 1];
-    let cls = '';
-    if (invertColor) {
-      /* Higher is worse (ttft, queue) */
-      if (svgEl.id === 'ttftSparkline') {
-        if (lastVal > 1000) cls = 'critical';
-        else if (lastVal > 400) cls = 'warning';
-      } else if (svgEl.id === 'queueSparkline') {
-        if (lastVal > 50) cls = 'critical';
-        else if (lastVal > 15) cls = 'warning';
+  function podStatusColor(p) {
+    if (p.down) return C.muted;
+    if (p.health < 0.2) return C.red;
+    if (p.health < 0.6) return C.amber;
+    return C.green;
+  }
+
+  function barFillColor(pct) {
+    if (pct > 85) return C.red;
+    if (pct > 65) return C.amber;
+    return C.green;
+  }
+
+  function drawPod(p, time) {
+    var x = p.x, y = p.y, w = p.w, h = p.h;
+    var r = Math.min(6, w * 0.06);
+    var sc = podStatusColor(p);
+
+    // Glow effect
+    if (!p.down) {
+      var glowI = 8 + Math.sin(p.glowPhase) * 4;
+      ctx.save();
+      ctx.shadowColor = sc;
+      ctx.shadowBlur = glowI;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+      ctx.strokeStyle = 'transparent';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Pod body
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fillStyle = p.down ? '#131b2a' : C.bg;
+    ctx.fill();
+    ctx.strokeStyle = p.down ? hexAlpha(C.red, 0.25) : hexAlpha(sc, 0.5);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Crack effect
+    if (p.crackProgress > 0.15) {
+      ctx.save();
+      ctx.globalAlpha = p.crackProgress;
+      ctx.strokeStyle = C.red;
+      ctx.lineWidth = 1.5;
+      var cx = x + w / 2, cy = y + h / 2;
+      for (var c = 0; c < 5; c++) {
+        var angle = (c / 5) * Math.PI * 2 + p.id * 0.8;
+        var len = Math.min(w, h) * 0.35 * p.crackProgress;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        var mx = cx + Math.cos(angle) * len * 0.5 + (Math.sin(p.id + c) * 5);
+        var my = cy + Math.sin(angle) * len * 0.5 + (Math.cos(p.id + c) * 5);
+        ctx.lineTo(mx, my);
+        ctx.lineTo(cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
+        ctx.stroke();
       }
+      ctx.restore();
+    }
+
+    // Status dot
+    var dotR = Math.min(3.5, w * 0.03);
+    ctx.beginPath();
+    ctx.arc(x + w - 8, y + 8, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = sc;
+    ctx.fill();
+
+    // Content varies by pod size
+    if (p.down) {
+      // DOWN label
+      var downFontSize = Math.min(13, w * 0.1);
+      ctx.font = '700 ' + downFontSize + 'px "Red Hat Display", sans-serif';
+      ctx.fillStyle = C.red;
+      ctx.textAlign = 'center';
+      ctx.fillText('DOWN', x + w / 2, y + h / 2 + downFontSize * 0.3);
+      ctx.textAlign = 'left';
+      return;
+    }
+
+    var monoFont = '"SF Mono","Fira Code","Cascadia Code",Consolas,monospace';
+
+    if (w > 80 && h > 55) {
+      // Full pod rendering with bars
+      var lblSize = Math.min(8, w * 0.06);
+      ctx.font = '500 ' + lblSize + 'px ' + monoFont;
+      ctx.fillStyle = C.text3;
+      ctx.textAlign = 'left';
+      ctx.fillText('GPU-' + p.id, x + 8, y + 12);
+
+      var barX = x + 8;
+      var barY = y + 20;
+      var barW = w - 16;
+      var barH = Math.min(4, h * 0.05);
+      var barGap = barH + 5;
+      var valFontSize = Math.min(7, w * 0.055);
+
+      var bars = [
+        { label: 'CPU', val: p.cpu },
+        { label: 'GPU', val: p.gpu },
+        { label: 'MEM', val: p.mem },
+        { label: 'KV$', val: p.kv },
+      ];
+
+      bars.forEach(function (bar, bi) {
+        var by = barY + bi * barGap;
+        if (by + barH > y + h - 6) return;
+
+        // Label
+        ctx.font = '500 ' + valFontSize + 'px ' + monoFont;
+        ctx.fillStyle = C.text3;
+        ctx.textAlign = 'left';
+        ctx.fillText(bar.label, barX, by + barH);
+
+        // Track
+        var trkX = barX + valFontSize * 3.2;
+        var trkW = barW - valFontSize * 3.2 - valFontSize * 3;
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(trkX, by, trkW, barH);
+
+        // Fill
+        var pct = clamp(bar.val, 0, 100);
+        ctx.fillStyle = barFillColor(pct);
+        ctx.fillRect(trkX, by, trkW * pct / 100, barH);
+
+        // Value
+        ctx.fillStyle = C.text2;
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(pct) + '%', barX + barW, by + barH);
+        ctx.textAlign = 'left';
+      });
+    } else if (w > 35) {
+      // Small pod: just show ID and color fill
+      var idSize = Math.min(10, w * 0.25);
+      ctx.font = '700 ' + idSize + 'px ' + monoFont;
+      ctx.fillStyle = sc === C.green ? C.text2 : sc;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.id, x + w / 2, y + h / 2 + idSize * 0.35);
+      ctx.textAlign = 'left';
     } else {
-      /* Lower is worse (throughput, cache) */
-      if (svgEl.id === 'throughputSparkline') {
-        if (lastVal < 30) cls = 'critical';
-        else if (lastVal < 80) cls = 'warning';
-      } else if (svgEl.id === 'cacheSparkline') {
-        if (lastVal < 30) cls = 'critical';
-        else if (lastVal < 60) cls = 'warning';
-      }
+      // Tiny pod: just a colored fill
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, w - 4, h - 4, Math.max(0, r - 1));
+      ctx.fillStyle = hexAlpha(sc, 0.15);
+      ctx.fill();
     }
-
-    svgEl.innerHTML =
-      '<path class="sparkline-area ' + cls + '" d="' + areaD + '"/>' +
-      '<path class="sparkline-path ' + cls + '" d="' + pathD + '"/>';
   }
 
   /* ==========================================================
-     Update DOM helpers
+     SPARKLINE RENDERING (canvas-based)
      ========================================================== */
-  function barColor(pct) {
-    if (pct > 85) return 'critical';
-    if (pct > 65) return 'warning';
-    return '';
-  }
+  function drawSparkline(key) {
+    var cvs = sparkCanvases[key];
+    if (!cvs) return;
+    var data = mHist[key];
+    if (data.length < 2) return;
 
-  function updatePodsDOM() {
-    pods.forEach(function (pod, idx) {
-      const el = document.getElementById('pod-' + pod.index);
-      if (!el) return;
+    var sctx = cvs.getContext('2d');
+    var ddpr = window.devicePixelRatio || 1;
+    var sw = cvs.clientWidth;
+    var sh = cvs.clientHeight;
+    cvs.width = sw * ddpr;
+    cvs.height = sh * ddpr;
+    sctx.setTransform(ddpr, 0, 0, ddpr, 0, 0);
+    sctx.clearRect(0, 0, sw, sh);
 
-      /* Card state */
-      el.classList.toggle('down', pod.down);
-      el.classList.toggle('warning', !pod.down && !pod.healthy && pod.cpu < 85);
-      el.classList.toggle('critical', !pod.down && !pod.healthy && pod.cpu >= 85);
+    var min = Infinity, max = -Infinity;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i] < min) min = data[i];
+      if (data[i] > max) max = data[i];
+    }
+    var range = max - min || 1;
 
-      /* Status dot */
-      const dot = el.querySelector('.pod-status-dot');
-      dot.className = 'pod-status-dot';
-      if (pod.down) dot.classList.add('down');
-      else if (!pod.healthy) dot.classList.add(pod.cpu >= 85 ? 'critical' : 'warning');
-
-      /* Bars */
-      var bars = {cpu: pod.cpu, mem: pod.mem, gpu: pod.gpu, kv: pod.kvCache};
-      ['cpu','mem','gpu','kv'].forEach(function (key) {
-        const fill = el.querySelector('[data-bar="' + key + '"]');
-        const val = el.querySelector('[data-bv="' + key + '"]');
-        if (fill && val) {
-          const pct = pod.down ? 0 : clamp(bars[key], 0, 100);
-          fill.style.width = pct + '%';
-          fill.className = 'bar-fill ' + barColor(pct);
-          val.textContent = Math.round(pct) + '%';
-        }
-      });
-
-      /* Queue blocks */
-      const qBlocks = el.querySelectorAll('.queue-block');
-      const qCount = pod.down ? 0 : Math.round(pod.queue);
-      qBlocks.forEach(function (qb, bi) {
-        qb.classList.toggle('active', bi < qCount);
-        qb.className = 'queue-block' + (bi < qCount ? ' active' : '');
-        if (bi < qCount) {
-          if (qCount > 14) qb.classList.add('critical');
-          else if (qCount > 8) qb.classList.add('warning');
-        }
-      });
-      const qv = el.querySelector('[data-qv]');
-      if (qv) qv.textContent = qCount;
-
-      /* Down label */
-      const downLabel = el.querySelector('.pod-down-label');
-      downLabel.classList.toggle('visible', pod.down);
-
-      /* Cache flash */
-      const cacheFlash = el.querySelector('.cache-flash');
-      if (pod.cacheMiss) {
-        cacheFlash.textContent = 'CACHE MISS';
-        cacheFlash.className = 'cache-flash miss visible';
-      } else if (pod.cacheHit) {
-        cacheFlash.textContent = 'CACHE HIT';
-        cacheFlash.className = 'cache-flash hit visible';
-      } else {
-        cacheFlash.classList.remove('visible');
+    // Determine color
+    var def = null;
+    METRIC_DEFS.forEach(function (d) { if (d.key === key) def = d; });
+    var val = mDisp[key];
+    var color = C.green;
+    if (def && def.warnAt !== null) {
+      if (def.badDir > 0) { // higher is worse
+        if (val > def.critAt) color = C.red;
+        else if (val > def.warnAt) color = C.amber;
+      } else if (def.badDir < 0) { // lower is worse
+        if (val < def.critAt) color = C.red;
+        else if (val < def.warnAt) color = C.amber;
       }
+    }
+    // GPU util: high=green, low=red
+    if (key === 'gpu') {
+      if (val > 90) color = C.amber; // overloaded
+      else if (val < 25) color = C.red;
+      else color = C.green;
+    }
 
-      /* Timeouts */
-      const timeoutEl = el.querySelector('.timeout-counter');
-      if (load >= T_QUEUE && !fixes[0] && !pod.down) {
-        const timeouts = Math.floor((load - T_QUEUE) * 0.4);
-        timeoutEl.textContent = timeouts + ' timeouts';
-        timeoutEl.classList.add('visible');
-      } else {
-        timeoutEl.classList.remove('visible');
-      }
-    });
+    // Area
+    sctx.beginPath();
+    sctx.moveTo(0, sh);
+    for (var j = 0; j < data.length; j++) {
+      var px = (j / (data.length - 1)) * sw;
+      var py = sh - ((data[j] - min) / range) * (sh - 2) - 1;
+      sctx.lineTo(px, py);
+    }
+    sctx.lineTo(sw, sh);
+    sctx.closePath();
+    sctx.fillStyle = hexAlpha(color, 0.08);
+    sctx.fill();
+
+    // Line
+    sctx.beginPath();
+    for (var k = 0; k < data.length; k++) {
+      var lx = (k / (data.length - 1)) * sw;
+      var ly = sh - ((data[k] - min) / range) * (sh - 2) - 1;
+      if (k === 0) sctx.moveTo(lx, ly); else sctx.lineTo(lx, ly);
+    }
+    sctx.strokeStyle = color;
+    sctx.lineWidth = 1.5;
+    sctx.stroke();
   }
 
-  function metricColorClass(key, val) {
-    if (key === 'ttft') {
-      if (val > 1500) return 'critical';
-      if (val > 600) return 'warning';
-      if (val < 250) return 'good';
-      return '';
-    }
-    if (key === 'throughput') {
-      if (val < 30) return 'critical';
-      if (val < 80) return 'warning';
-      if (val > 150) return 'good';
-      return '';
-    }
-    if (key === 'cache') {
-      if (val < 20) return 'critical';
-      if (val < 50) return 'warning';
-      if (val > 75) return 'good';
-      return '';
-    }
-    if (key === 'queue') {
-      if (val > 60) return 'critical';
-      if (val > 20) return 'warning';
-      if (val < 8) return 'good';
-      return '';
-    }
-    return '';
-  }
-
-  function metricCardClass(key, val) {
-    var cls = metricColorClass(key, val);
-    if (cls === 'critical') return 'critical';
-    if (cls === 'warning') return 'warning';
-    return '';
-  }
-
-  function trendIndicator(history) {
-    if (history.length < 4) return {text: '--', cls: 'neutral'};
-    var recent = history[history.length - 1];
-    var prev = history[history.length - 4];
-    var diff = recent - prev;
-    var pct = prev !== 0 ? Math.abs(diff / prev * 100) : 0;
-    if (pct < 2) return {text: '--', cls: 'neutral'};
-    if (diff > 0) return {text: '+' + Math.round(pct) + '%', cls: 'up'};
-    return {text: '-' + Math.round(pct) + '%', cls: 'down'};
-  }
-
+  /* ==========================================================
+     DOM UPDATES
+     ========================================================== */
   function updateMetricsDOM() {
-    /* TTFT */
-    var ttftRound = Math.round(animMetrics.ttft);
-    metricEls.ttft.value.textContent = ttftRound.toLocaleString();
-    metricEls.ttft.value.className = 'metric-value ' + metricColorClass('ttft', ttftRound);
-    metricEls.ttft.card.className = 'metric-card animate-in ' + metricCardClass('ttft', ttftRound);
-    var ttftTr = trendIndicator(sparkHistory.ttft);
-    metricEls.ttft.trend.textContent = ttftTr.text;
-    /* For TTFT, "up" trend is bad (higher latency) */
-    metricEls.ttft.trend.className = 'metric-trend ' + (ttftTr.cls === 'up' ? 'up' : ttftTr.cls === 'down' ? 'down' : 'neutral');
-    renderSparkline(metricEls.ttft.sparkline, sparkHistory.ttft, true);
+    METRIC_DEFS.forEach(function (d) {
+      mDisp[d.key] = lerp(mDisp[d.key], mVals[d.key], 0.08);
+      var val = mDisp[d.key];
 
-    /* Throughput */
-    var tpRound = Math.round(animMetrics.throughput);
-    metricEls.throughput.value.textContent = tpRound;
-    metricEls.throughput.value.className = 'metric-value ' + metricColorClass('throughput', tpRound);
-    metricEls.throughput.card.className = 'metric-card animate-in ' + metricCardClass('throughput', tpRound);
-    var tpTr = trendIndicator(sparkHistory.throughput);
-    metricEls.throughput.trend.textContent = tpTr.text;
-    /* For throughput, "down" trend is bad */
-    metricEls.throughput.trend.className = 'metric-trend ' + (tpTr.cls === 'down' ? 'up' : tpTr.cls === 'up' ? 'down' : 'neutral');
-    renderSparkline(metricEls.throughput.sparkline, sparkHistory.throughput, false);
+      var mv = document.getElementById('mv-' + d.key);
+      if (mv) mv.textContent = formatMetric(d.key, val);
 
-    /* Cache */
-    var cacheRound = Math.round(animMetrics.cache);
-    metricEls.cache.value.textContent = cacheRound;
-    metricEls.cache.value.className = 'metric-value ' + metricColorClass('cache', cacheRound);
-    metricEls.cache.card.className = 'metric-card animate-in ' + metricCardClass('cache', cacheRound);
-    var cacheTr = trendIndicator(sparkHistory.cache);
-    metricEls.cache.trend.textContent = cacheTr.text;
-    /* For cache, "down" trend is bad */
-    metricEls.cache.trend.className = 'metric-trend ' + (cacheTr.cls === 'down' ? 'up' : cacheTr.cls === 'up' ? 'down' : 'neutral');
-    renderSparkline(metricEls.cache.sparkline, sparkHistory.cache, false);
+      // Color
+      var cls = '';
+      if (d.warnAt !== null) {
+        if (d.badDir > 0) {
+          if (val > d.critAt) cls = 'crit';
+          else if (val > d.warnAt) cls = 'warn';
+        } else if (d.badDir < 0) {
+          if (val < d.critAt) cls = 'crit';
+          else if (val < d.warnAt) cls = 'warn';
+        }
+      }
+      if (d.key === 'gpu') {
+        if (val > 90) cls = 'warn';
+        else if (val < 25) cls = 'crit';
+      }
 
-    /* Queue */
-    var qRound = Math.round(animMetrics.queue);
-    metricEls.queue.value.textContent = qRound;
-    metricEls.queue.value.className = 'metric-value ' + metricColorClass('queue', qRound);
-    metricEls.queue.card.className = 'metric-card animate-in ' + metricCardClass('queue', qRound);
-    var qTr = trendIndicator(sparkHistory.queue);
-    metricEls.queue.trend.textContent = qTr.text;
-    /* For queue, "up" trend is bad */
-    metricEls.queue.trend.className = 'metric-trend ' + (qTr.cls === 'up' ? 'up' : qTr.cls === 'down' ? 'down' : 'neutral');
-    renderSparkline(metricEls.queue.sparkline, sparkHistory.queue, true);
+      var mc = document.getElementById('mc-' + d.key);
+      if (mc) mc.className = 'm-card' + (cls ? ' ' + cls : '');
 
-    /* Active pods */
-    var activePods = pods.filter(function (p) { return !p.down; }).length;
-    metricEls.pods.value.textContent = activePods;
-    metricEls.pods.value.nextElementSibling.textContent = '/ ' + pods.length;
-    if (activePods < pods.length) {
-      metricEls.pods.value.className = 'metric-value critical';
-      metricEls.pods.card.className = 'metric-card animate-in critical';
-    } else {
-      metricEls.pods.value.className = 'metric-value good';
-      metricEls.pods.card.className = 'metric-card animate-in';
-    }
+      if (mv) {
+        mv.style.color = cls === 'crit' ? 'var(--red)' : cls === 'warn' ? 'var(--amber)' : '';
+      }
 
-    /* Restarts */
-    metricEls.restarts.value.textContent = restartCount;
-    if (restartCount > 5) {
-      metricEls.restarts.value.className = 'metric-value critical';
-      metricEls.restarts.card.className = 'metric-card animate-in critical';
-    } else if (restartCount > 0) {
-      metricEls.restarts.value.className = 'metric-value warning';
-      metricEls.restarts.card.className = 'metric-card animate-in warning';
-    } else {
-      metricEls.restarts.value.className = 'metric-value good';
-      metricEls.restarts.card.className = 'metric-card animate-in';
-    }
+      // Trend
+      var mt = document.getElementById('mt-' + d.key);
+      var h = mHist[d.key];
+      if (mt && h.length >= 6) {
+        var recent = h[h.length - 1];
+        var older = h[h.length - 6];
+        var diff = recent - older;
+        var pct = older !== 0 ? Math.abs(diff / older * 100) : 0;
+        if (pct < 2) {
+          mt.textContent = '--';
+          mt.className = 'm-trend flat';
+        } else {
+          var up = diff > 0;
+          var isBad;
+          if (d.badDir > 0) isBad = up;
+          else if (d.badDir < 0) isBad = !up;
+          else isBad = false;
+          mt.textContent = (up ? '+' : '-') + Math.round(pct) + '%';
+          mt.className = 'm-trend ' + (isBad ? 'bad' : 'good');
+        }
+      }
+
+      // Sparkline
+      if (tickCount % 2 === 0) drawSparkline(d.key);
+    });
+  }
+
+  function updateScoreDOM() {
+    dispScore = lerp(dispScore, score, 0.06);
+    var s = Math.round(dispScore);
+    $scoreVal.textContent = s;
+    var offset = CIRC * (1 - s / 100);
+    $scoreArc.setAttribute('stroke-dashoffset', offset);
+    var col = s >= 70 ? 'var(--green)' : s >= 40 ? 'var(--amber)' : 'var(--red)';
+    $scoreArc.style.stroke = col;
+    $scoreVal.style.color = col;
   }
 
   function updateGlobalStatus() {
-    var activePods = pods.filter(function (p) { return !p.down; }).length;
-    var hasDown = activePods < pods.length;
-    var highLoad = load > T_CASCADE;
-    var degraded = load > T_QUEUE;
-
-    if (fixes[4] || (fixes[0] && fixes[1] && fixes[2] && fixes[3])) {
-      $globalDot.className = 'status-dot';
-      $globalText.textContent = 'System Healthy';
-      $clusterCard.className = 'card animate-in fixed';
-    } else if (hasDown || highLoad) {
-      $globalDot.className = 'status-dot critical';
-      $globalText.textContent = 'System Critical';
-      $clusterCard.className = 'card animate-in critical';
-    } else if (degraded) {
-      $globalDot.className = 'status-dot warning';
-      $globalText.textContent = 'System Degraded';
-      $clusterCard.className = 'card animate-in warning';
+    var broken = FAILURES[scaleIdx] && !fixesApplied[scaleIdx] && !llmdOn;
+    var hasDown = pods.some(function (p) { return p.down; });
+    if (broken && (scaleIdx >= 6 || hasDown)) {
+      $sDot.className = 'status-dot crit';
+      $sText.textContent = 'System Critical';
+    } else if (broken) {
+      $sDot.className = 'status-dot warn';
+      $sText.textContent = 'System Degraded';
+    } else if (llmdOn) {
+      $sDot.className = 'status-dot';
+      $sText.textContent = 'System Optimized';
     } else {
-      $globalDot.className = 'status-dot';
-      $globalText.textContent = 'System Healthy';
-      $clusterCard.className = 'card animate-in';
+      $sDot.className = 'status-dot';
+      $sText.textContent = 'System Healthy';
     }
   }
 
-  function updateFixPanel() {
-    /* Show fix panel when load >= T_QUEUE */
-    var shouldShow = load >= T_QUEUE - 5;
-    $fixPanel.classList.toggle('visible', shouldShow);
-
-    /* Fix card state */
-    if (fixes[4]) {
-      $fixCard.className = 'card fix-panel-inner fixed';
-    } else if (fixes[0] || fixes[1] || fixes[2] || fixes[3]) {
-      $fixCard.className = 'card fix-panel-inner';
-    } else {
-      var hasProblems = load >= T_QUEUE;
-      $fixCard.className = 'card fix-panel-inner' + (hasProblems ? ' warning' : '');
+  /* ==========================================================
+     FAILURE & FIX PANEL
+     ========================================================== */
+  function showFailure() {
+    var f = FAILURES[scaleIdx];
+    if (!f || fixesApplied[scaleIdx] || llmdOn) {
+      $failBanner.classList.remove('show');
+      $fixPanel.classList.remove('show');
+      return;
     }
 
-    /* Enable/disable fix buttons based on what's broken */
-    /* Fix 0: EPP -- enabled when queue explosion is visible */
-    fixBtns[0].disabled = fixes[0] || load < T_QUEUE;
-    /* Fix 1: Cache-aware -- enabled when cache miss storm */
-    fixBtns[1].disabled = fixes[1] || load < T_CACHE;
-    /* Fix 2: Horizontal scaling -- enabled when uneven load */
-    fixBtns[2].disabled = fixes[2] || load < T_UNEVEN;
-    /* Fix 3: Health-aware -- enabled when OOM issues */
-    fixBtns[3].disabled = fixes[3] || load < T_OOM;
-    /* Fix 4: Full stack -- enabled when cascade OR when first 4 are applied */
-    fixBtns[4].disabled = fixes[4] || (load < T_CASCADE && !(fixes[0] && fixes[1] && fixes[2] && fixes[3]));
+    $failTitle.textContent = f.title;
+    $failTitle.className = 'fail-title' + (scaleIdx >= 5 ? '' : ' warn-title');
+    $failDesc.textContent = f.desc;
+    $failBanner.classList.add('show');
 
-    /* Applied state */
-    fixBtns.forEach(function (btn, i) {
-      btn.classList.toggle('applied', fixes[i]);
+    // Show fix panel
+    $fixPanel.classList.add('show');
+    $fixPrompt.textContent = 'Fix: ' + f.title + ' -- Choose the correct solution:';
+    $fixPrompt.className = 'fix-prompt';
+    $fixGrid.innerHTML = '';
+    $fixResult.className = 'fix-result';
+    $fixResult.style.display = 'none';
+    $prodBadge.classList.remove('show');
+
+    f.fixes.forEach(function (fix, i) {
+      var btn = document.createElement('button');
+      btn.className = 'fix-btn';
+      btn.innerHTML =
+        '<div class="fix-num">Option ' + (i + 1) + '</div>' +
+        '<div class="fix-name">' + fix.title + '</div>' +
+        '<div class="fix-desc">' + fix.desc + '</div>';
+
+      btn.addEventListener('click', function () {
+        if (btn.classList.contains('correct') || btn.classList.contains('disabled')) return;
+        handleFixChoice(fix, btn, f);
+      });
+
+      $fixGrid.appendChild(btn);
     });
-
-    /* Production badge */
-    $prodBadge.classList.toggle('visible', fixes[4]);
   }
 
-  function updateSliderVisual() {
-    var pct = $loadSlider.value;
-    $loadValue.textContent = pct + '%';
-    $sliderFill.style.width = pct + '%';
+  function handleFixChoice(fix, btnEl, failure) {
+    if (fix.correct) {
+      btnEl.classList.add('correct');
+      fixesApplied[scaleIdx] = true;
+      $fixPrompt.textContent = 'Correct!';
+      $fixPrompt.className = 'fix-prompt correct';
+      $fixResult.textContent = fix.feedback;
+      $fixResult.className = 'fix-result show ok';
+      $failBanner.classList.remove('show');
 
-    if (pct >= T_CASCADE) {
-      $sliderFill.className = 'slider-fill-bg critical';
-      $loadValue.style.color = 'var(--red)';
-    } else if (pct >= T_QUEUE) {
-      $sliderFill.className = 'slider-fill-bg warning';
-      $loadValue.style.color = 'var(--amber)';
-    } else {
-      $sliderFill.className = 'slider-fill-bg';
-      $loadValue.style.color = 'var(--text-primary)';
-    }
-  }
+      // Disable other buttons
+      var allBtns = $fixGrid.querySelectorAll('.fix-btn');
+      allBtns.forEach(function (b) { if (b !== btnEl) b.classList.add('disabled'); });
 
-  /* ==========================================================
-     Fix handlers
-     ========================================================== */
-  function applyFix(index) {
-    if (fixes[index]) return;
-    fixes[index] = true;
+      // Recover down pods
+      pods.forEach(function (p) {
+        if (p.down) { p.restartT = Math.min(p.restartT, 5); }
+        p.crackProgress = 0;
+      });
 
-    /* Fix-specific side effects */
-    switch (index) {
-      case 0: /* EPP -- load balancing */
-        break;
-      case 1: /* Cache-aware routing */
-        break;
-      case 2: /* Horizontal scaling */
-        /* Add pods */
-        if (pods.length < SCALED_POD_COUNT) {
-          var newCount = SCALED_POD_COUNT - pods.length;
-          for (var i = 0; i < newCount; i++) {
-            pods.push(createPod(pods.length));
-          }
-          totalPodSlots = SCALED_POD_COUNT;
-          renderPodsDOM();
-          /* Animate new pods */
-          var allPodEls = $podsGrid.querySelectorAll('.pod-card');
-          for (var j = INITIAL_POD_COUNT; j < allPodEls.length; j++) {
-            allPodEls[j].classList.add('entering');
-          }
-        }
-        break;
-      case 3: /* Health-aware routing */
-        /* Recover any down pods quickly */
-        pods.forEach(function (p) {
-          if (p.down) {
-            p.restartTimer = Math.min(p.restartTimer, 5);
-          }
-        });
-        break;
-      case 4: /* Full stack */
-        /* Apply all fixes */
-        for (var k = 0; k < 4; k++) {
-          if (!fixes[k]) {
-            fixes[k] = true;
-            if (k === 2 && pods.length < SCALED_POD_COUNT) {
-              var count = SCALED_POD_COUNT - pods.length;
-              for (var m = 0; m < count; m++) {
-                pods.push(createPod(pods.length));
-              }
-              totalPodSlots = SCALED_POD_COUNT;
-              renderPodsDOM();
-              var podEls = $podsGrid.querySelectorAll('.pod-card');
-              for (var n = INITIAL_POD_COUNT; n < podEls.length; n++) {
-                podEls[n].classList.add('entering');
-              }
-            }
-            if (k === 3) {
-              pods.forEach(function (p) {
-                if (p.down) p.restartTimer = Math.min(p.restartTimer, 3);
-              });
-            }
-          }
-        }
-        break;
-    }
-  }
-
-  /* ==========================================================
-     Reset
-     ========================================================== */
-  function resetAll() {
-    targetLoad = 0;
-    $loadSlider.value = 0;
-    load = 0;
-    restartCount = 0;
-    tickCount = 0;
-
-    for (var i = 0; i < 5; i++) fixes[i] = false;
-
-    animMetrics.ttft = 180;
-    animMetrics.throughput = 120;
-    animMetrics.cache = 82;
-    animMetrics.queue = 4;
-
-    sparkHistory.ttft = [];
-    sparkHistory.throughput = [];
-    sparkHistory.cache = [];
-    sparkHistory.queue = [];
-
-    initPods();
-    renderPodsDOM();
-    updateSliderVisual();
-    updateMetricsDOM();
-    updateGlobalStatus();
-    updateFixPanel();
-    $prodBadge.classList.remove('visible');
-  }
-
-  /* ==========================================================
-     Event listeners
-     ========================================================== */
-  $loadSlider.addEventListener('input', function () {
-    targetLoad = parseInt(this.value, 10);
-    updateSliderVisual();
-  });
-
-  $resetBtn.addEventListener('click', resetAll);
-
-  fixBtns.forEach(function (btn, i) {
-    btn.addEventListener('click', function () {
-      if (!btn.disabled) {
-        applyFix(i);
+      // Check if all failures are now fixed
+      var allFixed = true;
+      for (var i = 2; i <= 7; i++) {
+        if (FAILURES[i] && !fixesApplied[i] && i <= scaleIdx) { allFixed = false; break; }
       }
-    });
+      if (allFixed && scaleIdx >= 7) {
+        $prodBadge.classList.add('show');
+      }
+    } else {
+      btnEl.classList.add('wrong');
+      $fixPrompt.textContent = 'Wrong -- try again!';
+      $fixPrompt.className = 'fix-prompt wrong';
+      $fixResult.textContent = fix.feedback;
+      $fixResult.className = 'fix-result show bad';
+
+      // Brief metric spike
+      mVals.err = Math.min(80, mVals.err * 1.5 + 5);
+      mVals.ttft = mVals.ttft * 1.2 + 150;
+
+      setTimeout(function () {
+        btnEl.classList.remove('wrong');
+        btnEl.classList.add('disabled');
+        if (!fixesApplied[scaleIdx]) {
+          $fixPrompt.textContent = 'Choose the correct fix:';
+          $fixPrompt.className = 'fix-prompt';
+        }
+      }, 1200);
+    }
+  }
+
+  /* ==========================================================
+     SCALE ACTIONS
+     ========================================================== */
+  function setScale(newIdx) {
+    scaleIdx = clamp(newIdx, 0, SCALE_LEVELS.length - 1);
+    gpuCount = SCALE_LEVELS[scaleIdx];
+    $gpuCount.textContent = gpuCount;
+    $canvasTitle.textContent = 'Cluster Visualization — ' + gpuCount + ' GPU' + (gpuCount > 1 ? 's' : '');
+    $scaleUp.disabled = scaleIdx >= SCALE_LEVELS.length - 1;
+    $scaleDown.disabled = scaleIdx <= 0;
+    rebuildPods(gpuCount);
+    resizeCanvas();
+    showFailure();
+    updateGlobalStatus();
+  }
+
+  $scaleUp.addEventListener('click', function () { setScale(scaleIdx + 1); });
+  $scaleDown.addEventListener('click', function () { setScale(scaleIdx - 1); });
+
+  /* ==========================================================
+     TOGGLE
+     ========================================================== */
+  $llmdToggle.addEventListener('change', function () {
+    llmdOn = this.checked;
+    $toggleOn.classList.toggle('active', llmdOn);
+    $toggleOff.classList.toggle('active', !llmdOn);
+    if (llmdOn) {
+      $failBanner.classList.remove('show');
+      $fixPanel.classList.remove('show');
+      // Recover pods
+      pods.forEach(function (p) {
+        if (p.down) { p.down = false; p.health = 0.5; p.cpu = 18; p.gpu = 60; p.mem = 25; p.kv = 15; p.queue = 1; }
+        p.crackProgress = 0;
+      });
+    } else {
+      if (FAILURES[scaleIdx] && !fixesApplied[scaleIdx]) {
+        showFailure();
+      }
+    }
+    updateGlobalStatus();
   });
 
   /* ==========================================================
-     Main loop
+     KNOWN LIMITS
      ========================================================== */
-  initPods();
-  renderPodsDOM();
-  updateSliderVisual();
+  $limitsToggle.addEventListener('click', function () {
+    var open = $limitsBody.classList.toggle('open');
+    $limitsArrow.style.transform = open ? 'rotate(180deg)' : '';
+  });
 
-  /* Initialize sparklines with baseline data */
-  for (var s = 0; s < SPARKLINE_POINTS; s++) {
-    pushSparkline('ttft', 180 + (Math.random() - 0.5) * 20);
-    pushSparkline('throughput', 120 + (Math.random() - 0.5) * 15);
-    pushSparkline('cache', 82 + (Math.random() - 0.5) * 5);
-    pushSparkline('queue', 4 + (Math.random() - 0.5) * 2);
+  /* ==========================================================
+     RESET
+     ========================================================== */
+  $reset.addEventListener('click', function () {
+    scaleIdx = 0;
+    gpuCount = 1;
+    llmdOn = false;
+    $llmdToggle.checked = false;
+    $toggleOn.classList.remove('active');
+    $toggleOff.classList.add('active');
+    score = 100;
+    dispScore = 100;
+    fixesApplied = {};
+    tickCount = 0;
+    particles = [];
+    $prodBadge.classList.remove('show');
+    initMetrics();
+    buildMetricsDOM();
+    setScale(0);
+  });
+
+  /* ==========================================================
+     MAIN LOOP
+     ========================================================== */
+  var lastTime = 0;
+  var simAccum = 0;
+
+  function mainLoop(time) {
+    requestAnimationFrame(mainLoop);
+    var dt = lastTime ? time - lastTime : 16;
+    lastTime = time;
+    if (dt > 200) dt = 200;
+
+    simAccum += dt;
+    while (simAccum >= SIM_DT) {
+      simulate();
+      spawnParticles();
+      updateParticles();
+      simAccum -= SIM_DT;
+    }
+
+    drawCanvas(time);
+    updateMetricsDOM();
+    updateScoreDOM();
   }
 
-  setInterval(simulate, TICK_MS);
-  simulate();
+  /* ==========================================================
+     INIT
+     ========================================================== */
+  initMetrics();
+  buildMetricsDOM();
+  rebuildPods(1);
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  requestAnimationFrame(mainLoop);
+
 })();
 </script>
 </body>
