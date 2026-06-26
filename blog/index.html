@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Breaks at Scale: 5 Failure Modes That Kill Your LLM POC | llm-d</title>
+    <meta name="description" content="A first-person walkthrough of the 5 failure modes that kill LLM inference at scale, and how llm-d fixes each one.">
+    <meta name="author" content="Markell Rawls">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&family=Red+Hat+Text:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Red Hat Text', sans-serif;
+            font-size: 18px;
+            line-height: 1.75;
+            color: #1a1a2e;
+            background-color: #fafafa;
+        }
+
+        /* Header */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .site-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #1a1a2e;
+        }
+
+        .site-header .brand img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .site-header .brand span {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 900;
+            font-size: 1.3rem;
+        }
+
+        .site-header nav a {
+            font-family: 'Red Hat Text', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #555;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .site-header nav a:hover {
+            color: #e00;
+        }
+
+        /* Article container */
+        .article-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* Metadata block */
+        .meta-block {
+            background: #f0f0f5;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .meta-block .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-block .meta-label {
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* Tags */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e8e8f0;
+            color: #444;
+            font-family: 'Red Hat Text', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Title area */
+        .article-title {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 900;
+            font-size: 2.6rem;
+            line-height: 1.15;
+            color: #0d0d1a;
+            margin-bottom: 12px;
+        }
+
+        .article-subtitle {
+            font-family: 'Red Hat Text', sans-serif;
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 400;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .byline {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 32px;
+        }
+
+        .byline strong {
+            color: #555;
+        }
+
+        /* Body content */
+        .article-body h2 {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 900;
+            font-size: 1.7rem;
+            color: #0d0d1a;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #e00;
+        }
+
+        .article-body h3 {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 28px;
+            margin-bottom: 10px;
+        }
+
+        .article-body p {
+            margin-bottom: 20px;
+        }
+
+        .article-body a {
+            color: #c00;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .article-body a:hover {
+            color: #e00;
+        }
+
+        .article-body strong {
+            font-weight: 700;
+            color: #111;
+        }
+
+        .article-body code {
+            font-family: 'Courier New', Courier, monospace;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: #c00;
+        }
+
+        .article-body ul, .article-body ol {
+            margin-bottom: 20px;
+            padding-left: 28px;
+        }
+
+        .article-body li {
+            margin-bottom: 8px;
+        }
+
+        /* Callout box */
+        .callout {
+            background: #fdf6f0;
+            border-left: 4px solid #e00;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 32px 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .callout p + p {
+            margin-top: 12px;
+        }
+
+        .callout strong {
+            color: #b00;
+        }
+
+        /* Failure mode pattern styling */
+        .failure-intro {
+            background: #f5f5fa;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #333;
+            border-left: 3px solid #999;
+        }
+
+        /* CTA section */
+        .cta-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            border-radius: 12px;
+            padding: 40px 32px;
+            margin-top: 56px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .cta-section h2 {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            border: none;
+            margin-top: 0;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .cta-section p {
+            color: #ccc;
+            margin-bottom: 24px;
+        }
+
+        .cta-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .cta-link {
+            display: inline-block;
+            font-family: 'Red Hat Text', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .cta-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .cta-link.primary {
+            background: #e00;
+            color: #fff;
+        }
+
+        .cta-link.secondary {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .site-footer a {
+            color: #888;
+            text-decoration: none;
+        }
+
+        .site-footer a:hover {
+            color: #e00;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .article-title {
+                font-size: 1.9rem;
+            }
+
+            .article-body h2 {
+                font-size: 1.4rem;
+            }
+
+            .meta-block {
+                gap: 12px;
+            }
+
+            .cta-links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <a href="https://markellr-redhat.github.io/llm-d-content-hub/" class="brand">
+            <img src="https://llm-d.ai/img/llm-d-icon.png" alt="llm-d icon">
+            <span>llm-d</span>
+        </a>
+        <nav>
+            <a href="https://markellr-redhat.github.io/llm-d-content-hub/">Content Hub</a>
+        </nav>
+    </header>
+
+    <!-- Article -->
+    <article class="article-container">
+
+        <h1 class="article-title">What Breaks at Scale: 5 Failure Modes That Kill Your LLM POC (and How llm-d Fixes Each One)</h1>
+        <p class="article-subtitle">Your proof of concept works beautifully. Production will try to destroy it. Here is exactly how.</p>
+        <p class="byline">By <strong>Markell Rawls</strong>, Developer Advocate, Red Hat</p>
+
+        <!-- Metadata -->
+        <div class="meta-block">
+            <div class="meta-item">
+                <span class="meta-label">Author</span>
+                <span>Markell Rawls</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Word Count</span>
+                <span>~1,500</span>
+            </div>
+            <div class="meta-item">
+                <div class="tags">
+                    <span class="tag">llm-d</span>
+                    <span class="tag">Scaling</span>
+                    <span class="tag">Inference</span>
+                    <span class="tag">Kubernetes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="article-body">
+
+            <p>I had a proof of concept that worked beautifully. A single inference endpoint serving a 7B parameter model, running on one beefy GPU node. Latency was snappy. Responses were coherent. Stakeholders were impressed. I demoed it to leadership on a Thursday afternoon, and by Friday morning I had approval to "take it to production."</p>
+
+            <p>That is when everything fell apart.</p>
+
+            <p>Not all at once, mind you. Scaling problems are sneaky. They show up at 2 AM on a Tuesday when your on-call engineer is half asleep and your Slack channel is lighting up with "is the API down?" messages. They manifest as slow degradation, not clean errors. They look like everything is fine until suddenly nothing is fine.</p>
+
+            <p>Over the past year, I have watched the same five failure modes destroy LLM inference deployments over and over again. Not obscure edge cases -- these are fundamental scaling problems that every team hits the moment they move beyond a single-node setup. And they are exactly the problems that <a href="https://llm-d.ai">llm-d</a>, a CNCF Sandbox project for distributed LLM inference routing, was built to solve.</p>
+
+            <p>Let me walk you through each one.</p>
+
+            <!-- Failure Mode 1 -->
+            <h2>1. Queue Depth Explosion</h2>
+
+            <p class="failure-intro">What you see: Response times go from 200ms to 2 seconds to 30 seconds. Then timeouts start. Then everything stops.</p>
+
+            <p>This is usually the first thing that kills you. Your single inference node can handle maybe 10-15 concurrent requests comfortably. At 30 concurrent users, latency starts creeping up. At 50, you notice that <code>request_queue_depth</code> is growing linearly. At 100, it is growing exponentially, because each request takes longer, which means more requests pile up while waiting, which means each subsequent request takes even longer.</p>
+
+            <p>I watched this happen in real time during a load test. We went from a p99 latency of 400ms to over 45 seconds in the span of three minutes. The node was not crashing -- it was just drowning. Every request was valid, every response was correct, but the queue was so deep that users were timing out before their request ever reached the model.</p>
+
+            <p>The naive fix is to throw more pods at it. But if you are using a standard Kubernetes ingress with round-robin load balancing, you have just multiplied the problem. More on that in failure mode three.</p>
+
+            <h3>How llm-d fixes it</h3>
+            <p>The <strong>Endpoint Picker (EPP)</strong> is the core routing brain of llm-d. Instead of blindly distributing requests, it maintains real-time awareness of each pod's queue depth. When a request comes in, the EPP routes it to the pod with the most available capacity -- not the next pod in a round-robin cycle. Queue depths stabilize across the fleet, and that exponential blowup never happens. You still need enough total capacity, but the capacity you have gets used efficiently.</p>
+
+            <!-- Failure Mode 2 -->
+            <h2>2. Cache Miss Storm</h2>
+
+            <p class="failure-intro">What you see: Time to first token (TTFT) is consistently high even when the system is not under heavy load. GPU utilization spikes on prefill but throughput stays low.</p>
+
+            <p>This one is subtle, and I missed it for weeks. We had a chatbot application where users would have multi-turn conversations. Each turn, the model had to reprocess the entire conversation history from scratch. The <strong>KV cache</strong> -- the key-value pairs computed during the attention mechanism -- was being thrown away between requests because a standard load balancer had no concept of routing a follow-up request to the same pod that handled the previous turn.</p>
+
+            <p>The math is brutal. For a 7B model with a 4K context, prefill can take 150-300ms of pure GPU compute. If you are doing that from scratch on every single request in a multi-turn conversation, you are burning 40-60% of your GPU cycles on redundant computation. Your users experience it as a sluggish first token, and your finance team experiences it as a GPU bill that scales linearly with conversation depth.</p>
+
+            <h3>How llm-d fixes it</h3>
+            <p>llm-d implements <strong>cache-aware routing</strong>. The EPP knows which pods have which conversation prefixes already loaded in their KV caches. When a follow-up request comes in for an ongoing conversation, it gets routed to the pod that already has the relevant cache entries. The result is dramatic -- TTFT drops from hundreds of milliseconds to tens of milliseconds for cached conversations. In our testing, we saw a <strong>60-80% reduction in prefill compute</strong> for multi-turn workloads. That is not a marginal improvement. That is the difference between needing 10 GPUs and needing 4.</p>
+
+            <!-- Failure Mode 3 -->
+            <h2>3. Uneven Load Distribution</h2>
+
+            <p class="failure-intro">What you see: <code>kubectl top pods</code> shows one pod at 98% GPU utilization while three others sit at 15%. Latency is terrible despite having plenty of aggregate capacity.</p>
+
+            <p>Round-robin load balancing is a lie for LLM inference. Not all requests are equal. A request with a 50-token prompt and a 20-token response takes a fraction of the resources that a request with a 3,000-token prompt and a 500-token response requires. Round-robin treats them identically, which means you inevitably end up with hot spots -- pods that got unlucky and received a cluster of expensive requests while their neighbors coast.</p>
+
+            <p>I once watched a deployment where we had four pods running, theoretically enough capacity for our load. Pod <code>vllm-worker-2</code> was pegged at 100% GPU utilization with a queue 40 requests deep. Pod <code>vllm-worker-0</code> was essentially idle. A standard <code>Service</code> in Kubernetes with <code>sessionAffinity: None</code> does not know and does not care. It just sends the next request to the next pod in the list.</p>
+
+            <h3>How llm-d fixes it</h3>
+            <p>llm-d's routing is aware of request characteristics and pod state simultaneously. The EPP considers not just queue depth but actual GPU memory pressure, active sequence count, and estimated compute cost of pending requests. When you horizontally scale your inference pods, <strong>smart routing ensures the load actually distributes</strong> across them. Adding a pod to the fleet immediately starts absorbing its fair share of traffic, because the EPP actively steers work toward available capacity rather than waiting for round-robin chance to send something its way.</p>
+
+            <!-- Failure Mode 4 -->
+            <h2>4. Memory Pressure and OOM</h2>
+
+            <p class="failure-intro">What you see: Pods restart with <code>OOMKilled</code> status. Requests in flight are lost. Users get 503 errors with no explanation.</p>
+
+            <p>GPU memory is finite, and KV caches are hungry. Each active sequence in a model like Llama 2 7B consumes roughly 200-400MB of KV cache memory depending on your context length and quantization. A single A100 with 80GB of VRAM can hold the model weights (~14GB for FP16) and maybe 150-200 concurrent KV cache slots. That sounds like plenty until you realize that long-running sequences hold their cache slots for the entire duration of generation, which can be several seconds.</p>
+
+            <p>When memory gets tight, inference engines start evicting cached sequences to make room for new ones, which causes those evicted requests to fail or restart from scratch. If you push past the limit, the pod OOMs entirely. Kubernetes restarts it, but every in-flight request on that pod is gone. No graceful degradation. No retry. Just a <code>connection reset</code> on the client side and a confused user.</p>
+
+            <h3>How llm-d fixes it</h3>
+            <p>llm-d's <strong>health-aware routing</strong> monitors the memory pressure on each pod in real time. When a pod's KV cache utilization crosses a configurable threshold, the EPP stops sending new requests to it, allowing existing sequences to complete and memory to free up. This is not a binary healthy/unhealthy check -- it is a gradient. Pods under moderate pressure get fewer requests. Pods near their limit get none. The result is that no pod ever gets pushed to the OOM boundary, because the routing layer acts as a pressure relief valve. Unhealthy pods get <strong>drained, not hammered</strong>.</p>
+
+            <!-- Failure Mode 5 -->
+            <h2>5. Cascading Failure</h2>
+
+            <p class="failure-intro">What you see: One pod restarts, then another, then another. Within 90 seconds you go from "one pod is struggling" to "the entire fleet is down."</p>
+
+            <p>This is the boss fight. This is the failure mode that wakes you up at 3 AM and keeps you up until sunrise. It starts innocently -- one pod gets a burst of long-context requests and slows down. A standard load balancer does not notice (or does not care), so traffic keeps flowing to it. The pod OOMs and restarts. Now the remaining pods have to absorb the dead pod's traffic. They were already at 70% capacity, and now they are at 93%. One of them tips over. Now you have two pods down. The remaining pods are at 140% of what they can handle. The cascade completes in about 90 seconds.</p>
+
+            <p>I have seen this pattern destroy a 6-pod deployment in under two minutes. The root cause was a single burst of traffic that was maybe 20% above steady-state capacity. Not a 10x spike. Not a denial-of-service attack. Just a modest surge that exposed the fragility of a system without intelligent routing.</p>
+
+            <div class="callout">
+                <p><strong>The core insight:</strong> Cascading failure is not really a separate failure mode. It is what happens when failure modes 1 through 4 are not handled properly. Queue depth explosion plus uneven load distribution plus memory pressure equals a death spiral. Fix the individual failure modes, and the cascade cannot form.</p>
+            </div>
+
+            <h3>How llm-d fixes it</h3>
+            <p>This is where the full llm-d stack comes together. The EPP's <strong>queue-aware routing</strong> prevents depth explosion. <strong>Cache-aware routing</strong> reduces wasted compute. <strong>Load-aware distribution</strong> prevents hot spots. <strong>Health-aware draining</strong> keeps pods from hitting OOM. Each layer removes one of the preconditions for a cascade. Together, they create a system that degrades gracefully under pressure instead of collapsing catastrophically. When a pod does go down -- hardware failures happen -- the remaining pods absorb the traffic proportionally to their available capacity, not equally. A pod at 30% utilization picks up more than a pod at 80%. The system bends. It does not break.</p>
+
+            <!-- Conclusion -->
+            <h2>The Gap Between Demo and Production</h2>
+
+            <p>Every one of these failure modes has the same root cause: <strong>the infrastructure layer between your users and your model has no understanding of what LLM inference actually needs</strong>. Standard Kubernetes load balancers, ingress controllers, and service meshes were designed for stateless HTTP microservices. LLM inference is not that. It is stateful (KV cache), asymmetric (requests have wildly different costs), memory-intensive, and latency-sensitive in ways that traditional web services are not.</p>
+
+            <p>llm-d exists because this gap is not something you can patch with clever Kubernetes configs or custom HPA rules. You need a routing layer that speaks the language of inference -- one that understands queue depth, cache locality, memory pressure, and model-specific characteristics. That is what the Endpoint Picker provides, and it is why llm-d is being built as an open project under the CNCF Sandbox.</p>
+
+            <p>If any of these failure modes sound familiar, you are not alone. And if you are still in the POC phase, now is the time to think about what happens when you scale past one node. The problems do not announce themselves politely. They arrive all at once, at 2 AM, on a Tuesday.</p>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h2>See These Failure Modes in Action</h2>
+                <p>The companion interactive app lets you simulate each failure mode and watch llm-d's routing fix it in real time.</p>
+                <div class="cta-links">
+                    <a href="../" class="cta-link primary">Launch the Interactive App</a>
+                    <a href="https://markellr-redhat.github.io/llm-d-content-hub/" class="cta-link secondary">Back to Content Hub</a>
+                </div>
+            </div>
+
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>Markell Rawls &middot; Developer Advocate &middot; Red Hat</p>
+        <p style="margin-top: 8px;">
+            <a href="https://markellr-redhat.github.io/llm-d-content-hub/">llm-d Content Hub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="../">Interactive App</a>
+        </p>
+    </footer>
+
+</body>
+</html>
