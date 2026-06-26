@@ -385,6 +385,53 @@
             color: #79c0ff;
         }
 
+        /* ── Terminal Output Block ── */
+        .terminal-block {
+            background: #000000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Red Hat Mono', 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            position: relative;
+        }
+
+        .terminal-block::before {
+            content: attr(data-title);
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #586069;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .terminal-block .prompt {
+            color: #8b949e;
+        }
+
+        .terminal-block .err {
+            color: #f85149;
+        }
+
+        .terminal-block .warn {
+            color: #d29922;
+        }
+
+        .terminal-block .ok {
+            color: #3fb950;
+        }
+
+        .terminal-block .dim {
+            color: #484f58;
+        }
+
         /* ── Failure Mode Intro Box ── */
         .failure-intro {
             background: var(--bg-tertiary);
@@ -533,6 +580,84 @@
             margin-top: 2px;
         }
 
+        .cascade-step .desc code {
+            font-family: 'Red Hat Mono', 'Courier New', monospace;
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.82em;
+            color: var(--text-code);
+        }
+
+        .cascade-step .metrics {
+            font-family: 'Red Hat Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-red);
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        /* ── Checklist Section ── */
+        .checklist-tier {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin: 24px 0;
+        }
+
+        .checklist-tier h4 {
+            font-family: 'Red Hat Display', sans-serif;
+            font-weight: 900;
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist-tier h4 .gpu-label {
+            font-family: 'Red Hat Mono', monospace;
+            color: var(--accent-blue);
+        }
+
+        .checklist-tier ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .checklist-tier ul li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .checklist-tier ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--accent-blue);
+            border-radius: 3px;
+            background: transparent;
+        }
+
+        .checklist-tier ul li code {
+            font-family: 'Red Hat Mono', 'Courier New', monospace;
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.84em;
+            color: var(--text-code);
+        }
+
         /* ── CTA Section ── */
         .cta-section {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, #0f1a2e 100%);
@@ -671,6 +796,15 @@
             .scale-table th, .scale-table td {
                 padding: 8px 10px;
             }
+
+            .terminal-block {
+                font-size: 0.75rem;
+                padding: 12px 14px;
+            }
+
+            .checklist-tier {
+                padding: 18px 20px;
+            }
         }
     </style>
 </head>
@@ -708,6 +842,7 @@
                 <li><a href="#autoscaler">6. Autoscaler Oscillation</a></li>
                 <li><a href="#cascade">7. Cascading Failure</a></li>
                 <li><a href="#real-numbers">Real Numbers: Scale Thresholds</a></li>
+                <li><a href="#survival-checklist">Survival Checklist</a></li>
                 <li><a href="#llm-d-architecture">How llm-d Addresses It All</a></li>
                 <li><a href="#conclusion">The Gap Between Demo and Production</a></li>
             </ol>
@@ -718,7 +853,7 @@
 
             <div class="article-hero">
                 <h1 class="article-title">What Breaks at Scale: 7 Failure Modes That Kill Your LLM Deployment</h1>
-                <p class="article-subtitle">Your proof of concept works beautifully. Production will try to destroy it. Here is exactly how -- with the math, the metrics, and the war stories to prove it.</p>
+                <p class="article-subtitle">5 GPU clusters are easy. 50 GPU clusters are a different universe. This is what production looks like when the math stops being polite.</p>
             </div>
 
             <!-- Metadata -->
@@ -730,12 +865,12 @@
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
                     <span class="meta-label">Reading Time</span>
-                    <span>~18 min</span>
+                    <span>~20 min</span>
                 </div>
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
                     <span class="meta-label">Words</span>
-                    <span>~3,800</span>
+                    <span>~4,500</span>
                 </div>
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
@@ -756,17 +891,21 @@
 
                 <!-- Introduction -->
                 <section id="intro">
-                    <p>I had a proof of concept that worked beautifully. A single inference endpoint serving a 7B parameter model, running on one beefy GPU node. Latency was snappy. Responses were coherent. Stakeholders were impressed. I demoed it to leadership on a Thursday afternoon, and by Friday morning I had approval to "take it to production."</p>
+                    <p>At 2:47 AM on a Tuesday, my phone lit up with 47 Slack notifications. The inference cluster that had been running flawlessly for three weeks was on fire. Not a clean outage -- the kind of slow-motion disaster where dashboards turn red one panel at a time and every fix you try makes something else worse.</p>
 
-                    <p>That is when everything fell apart.</p>
+                    <p>Twelve hours earlier, a product manager had sent a company-wide email announcing the internal AI assistant. Traffic tripled. By midnight, the queue depths were climbing. By 2 AM, the first pod OOMed. By 3 AM, every pod in the fleet had restarted at least once, and the autoscaler was thrashing so hard it looked like a seismograph.</p>
 
-                    <p>Not all at once, mind you. Scaling problems are sneaky. They show up at 2 AM on a Tuesday when your on-call engineer is half asleep and your Slack channel is lighting up with "is the API down?" messages. They manifest as slow degradation, not clean errors. They look like everything is fine until suddenly nothing is fine.</p>
+                    <p>Here is the thing: the proof of concept had worked beautifully. A single inference endpoint serving a 7B parameter model on one beefy GPU node. Latency was snappy. Responses were coherent. I demoed it to leadership on a Thursday afternoon, and by Friday morning I had approval to "take it to production." The demo ran on 4 GPUs. Production needed 48. And those two numbers live in completely different universes.</p>
+
+                    <div class="callout warning">
+                        <p><strong>The uncomfortable truth:</strong> 5 GPU clusters are easy. 50 GPU clusters are a different universe. The failure modes are not the same problems at a larger magnitude -- they are categorically different problems that do not exist at small scale. You will not discover them in staging. You will discover them in production, at 2 AM, when the business depends on your system staying up.</p>
+                    </div>
 
                     <p>Over the past year, I have watched the same failure modes destroy LLM inference deployments over and over again. Not obscure edge cases -- these are fundamental scaling problems that every team hits the moment they move beyond a single-node setup. I originally documented five of them. But as I dug deeper into production incidents and talked to more teams running inference at scale, two more patterns kept recurring with enough consistency that they deserve their own headings.</p>
 
                     <p>These are the seven things that will break. And they are exactly the problems that <a href="https://llm-d.ai">llm-d</a>, a CNCF Sandbox project for distributed LLM inference routing, was built to solve.</p>
 
-                    <p>Let me walk you through each one.</p>
+                    <p>Let me walk you through each one -- with the math, the metrics, the error messages, and the war stories to prove it.</p>
                 </section>
 
                 <!-- ═══════════════ FAILURE MODE 1 ═══════════════ -->
@@ -774,7 +913,23 @@
 
                 <p class="failure-intro"><strong>What you see:</strong> Response times go from 200ms to 2 seconds to 30 seconds. Then timeouts start. Then everything stops.</p>
 
-                <p>This is usually the first thing that kills you, and it is worth understanding the math behind it because the math explains why the failure feels so sudden.</p>
+                <p>This is usually the first thing that kills you. You know it is happening when your Prometheus alerts start firing in sequence and your Grafana dashboard looks like this:</p>
+
+                <div class="terminal-block" data-title="Prometheus query -- the moment things go wrong">
+<span class="prompt">PromQL &gt;</span> histogram_quantile(0.99, rate(vllm_request_duration_seconds_bucket[5m]))
+<span class="dim">  # Result at 02:15 UTC:</span>  <span class="ok">0.34</span>
+<span class="dim">  # Result at 02:30 UTC:</span>  <span class="warn">1.87</span>
+<span class="dim">  # Result at 02:38 UTC:</span>  <span class="err">12.4</span>
+<span class="dim">  # Result at 02:41 UTC:</span>  <span class="err">timeout -- query canceled</span>
+
+<span class="prompt">PromQL &gt;</span> vllm_pending_requests
+<span class="dim">  # pod/vllm-worker-0:</span>  <span class="warn">47</span>
+<span class="dim">  # pod/vllm-worker-1:</span>  <span class="ok">3</span>
+<span class="dim">  # pod/vllm-worker-2:</span>  <span class="err">119</span>
+<span class="dim">  # pod/vllm-worker-3:</span>  <span class="ok">8</span>
+                </div>
+
+                <p>Look at that distribution. Pod 2 has 119 pending requests. Pod 1 has 3. That is not a capacity problem -- that is a routing problem. And it is worth understanding the math behind it because the math explains why the failure feels so sudden.</p>
 
                 <p>Start with <strong>Little's Law</strong>: <code>L = &lambda;W</code>, where <code>L</code> is the average number of requests in the system, <code>&lambda;</code> is the arrival rate, and <code>W</code> is the average time each request spends in the system. At steady state with low load, this is fine. Your inference engine can handle maybe 10-15 concurrent requests with a service time of around 400ms. That is an arrival rate of about 25-35 requests per second. The queue is shallow and stable.</p>
 
@@ -786,7 +941,7 @@
 
                 <p>Round-robin load balancing makes this catastrophically worse. Imagine four pods, each able to handle 15 concurrent requests comfortably. Round-robin sends request 1 to pod A, request 2 to pod B, request 3 to pod C, request 4 to pod D. That is fine when all requests are equal. But they are not. A request with a 3,000-token prompt and a 500-token generation is 20x more expensive than a 50-token prompt with a 20-token response. Round-robin does not know that. It sends expensive requests to pods that are already struggling and leaves capacity on pods that got lucky with cheap requests.</p>
 
-                <p>The metrics to watch are <code>request_queue_depth</code>, <code>time_to_first_token_p99</code>, and <code>pending_requests</code>. When <code>time_to_first_token_p99</code> starts climbing while your arrival rate is flat, you are entering the feedback loop. If you do not act within minutes, you are headed for a full stall.</p>
+                <p>The result looks exactly like that Prometheus output above: one pod drowning with 119 pending requests while its neighbor sits idle with 3. And by the time you notice the imbalance, the drowning pod is already past the point of recovery.</p>
 
                 <h3>How llm-d fixes it</h3>
                 <p>The <strong>Endpoint Picker (EPP)</strong> is the core routing brain of llm-d. Instead of blindly distributing requests round-robin, it maintains real-time awareness of each pod's queue depth, active sequence count, and estimated compute cost. When a request arrives, the EPP routes it to the pod with the most available capacity -- not the next pod in a rotation. Queue depths stabilize across the fleet, and that non-linear feedback loop never has a chance to form. You still need enough total capacity, but the capacity you have gets used efficiently.</p>
@@ -800,10 +955,21 @@
 
                 <p>During the attention computation in a transformer, each layer computes key and value vectors for every token in the sequence. For a model like Llama 2 70B with 80 layers, 64 attention heads per layer, and a head dimension of 128, the KV cache for a single token requires <code>2 (K+V) x 80 (layers) x 64 (heads) x 128 (dim) x 2 (bytes, FP16) = 2.6 MB per token</code>. For a 4K context window, that is roughly <strong>10.5 GB of KV cache per active sequence</strong>. An A100 with 80GB of VRAM can hold maybe 4-5 active long-context sequences alongside the model weights.</p>
 
-                <p>Now consider a multi-turn chatbot. User sends a message, model responds, user sends another message. Without cache-aware routing, the second request might land on a completely different pod. That pod has to recompute the entire KV cache for the conversation history from scratch -- a prefill operation that can take 300-800ms of pure GPU compute depending on sequence length. Multiply that by thousands of concurrent conversations and you are burning 40-60% of your GPU cycles on redundant prefill computation.</p>
+                <p>Now consider a multi-turn chatbot. User sends a message, model responds, user sends another message. Without cache-aware routing, the second request might land on a completely different pod. That pod has to recompute the entire KV cache for the conversation history from scratch. Your vLLM logs start telling the story:</p>
+
+                <div class="terminal-block" data-title="vLLM engine logs -- cache miss storm">
+<span class="warn">WARNING</span> 02:34:17 cache_engine.py:187 KV cache utilization: <span class="err">94.2%</span> -- evicting 12 sequences
+<span class="warn">WARNING</span> 02:34:17 cache_engine.py:201 Evicted prefix block shared by 8 active sequences
+<span class="dim">INFO</span>    02:34:18 llm_engine.py:302 Prefill: seq_id=a]7f2c, prompt_tokens=2048, <span class="err">cache_hit_rate=0.0%</span>, compute_ms=<span class="err">847</span>
+<span class="dim">INFO</span>    02:34:19 llm_engine.py:302 Prefill: seq_id=b]3e91, prompt_tokens=1536, <span class="err">cache_hit_rate=0.0%</span>, compute_ms=<span class="err">612</span>
+<span class="dim">INFO</span>    02:34:19 llm_engine.py:302 Prefill: seq_id=c]90d4, prompt_tokens=2048, cache_hit_rate=<span class="ok">87.5%</span>, compute_ms=<span class="ok">94</span>
+<span class="warn">WARNING</span> 02:34:20 cache_engine.py:187 KV cache utilization: <span class="err">97.1%</span> -- evicting 6 sequences
+                </div>
+
+                <p>Look at the difference: <code>cache_hit_rate=0.0%</code> means 847ms of prefill compute. <code>cache_hit_rate=87.5%</code> means 94ms. That is a 9x difference on a single request. Multiply that by thousands of concurrent conversations and you are burning 40-60% of your GPU cycles on redundant prefill computation.</p>
 
                 <h4>Eviction policy matters</h4>
-                <p>When GPU memory fills up, the inference engine must evict cached sequences to make room. Simple LRU (Least Recently Used) eviction sounds reasonable until you realize it has no awareness of prefix sharing. Consider ten conversations that all start with the same 500-token system prompt. LRU might evict one of those shared prefixes, forcing re-computation for multiple conversations. <strong>Prefix-aware eviction policies</strong> understand these sharing patterns and preferentially keep high-value prefixes in cache.</p>
+                <p>When GPU memory fills up, the inference engine must evict cached sequences to make room. Simple LRU (Least Recently Used) eviction sounds reasonable until you realize it has no awareness of prefix sharing. Consider ten conversations that all start with the same 500-token system prompt. LRU might evict one of those shared prefixes, forcing re-computation for multiple conversations. The log above shows exactly this: "Evicted prefix block shared by 8 active sequences." One bad eviction decision just created 8 cache misses. <strong>Prefix-aware eviction policies</strong> understand these sharing patterns and preferentially keep high-value prefixes in cache.</p>
 
                 <h4>The distributed cache problem</h4>
                 <p>As you scale past a single node, cache coherence becomes a real challenge. If user A's conversation is cached on pod 3, but pod 3 is overloaded, do you re-route to pod 7 (which has capacity but no cache) or wait for pod 3 to free up? This is a classic tradeoff between cache locality and load balance, and the answer depends on how expensive the cache miss is versus how long the queue wait would be.</p>
@@ -816,7 +982,17 @@
                 <!-- ═══════════════ FAILURE MODE 3 ═══════════════ -->
                 <h2 id="network">3. Network Topology Bottlenecks</h2>
 
-                <p class="failure-intro"><strong>What you see:</strong> Inter-node communication latency spikes. Tensor parallelism throughput drops. <code>NCCL</code> timeouts in your logs.</p>
+                <p class="failure-intro"><strong>What you see:</strong> Inter-node communication latency spikes. Tensor parallelism throughput drops. NCCL timeouts in your logs.</p>
+
+                <p>You know this failure mode has arrived when your pod logs fill up with messages you have never seen before:</p>
+
+                <div class="terminal-block" data-title="NCCL errors -- the network fabric is saturated">
+<span class="err">NCCL WARN Net : Connection refused (gpu 3 -> gpu 7, node2:48621)</span>
+<span class="err">NCCL WARN Timeout waiting for allreduce on comm 0x7f2a (timeout: 30000ms)</span>
+<span class="warn">vllm-worker-4  | WARNING: NCCL allreduce took 2847ms (expected &lt;50ms)</span>
+<span class="warn">vllm-worker-4  | WARNING: Tensor parallel step stalled -- waiting on rank 3</span>
+<span class="err">vllm-worker-6  | NCCL ERROR: unhandled system error, NCCL version 2.19.3</span>
+                </div>
 
                 <p>Most teams design their network for north-south traffic: requests coming in from clients, responses going back out. But LLM inference at scale generates enormous <strong>east-west traffic</strong> -- communication between GPU nodes for tensor parallelism, pipeline parallelism, and distributed KV cache operations.</p>
 
@@ -828,7 +1004,7 @@
                 <p>For GPU-to-GPU communication at these bandwidths, there are two main options: <strong>InfiniBand</strong> and <strong>RoCEv2</strong> (RDMA over Converged Ethernet v2). InfiniBand offers lower latency (~1 microsecond), hardware-level congestion management, and adaptive routing built into the fabric. RoCEv2 runs over standard Ethernet infrastructure, which means lower cost and simpler management, but it requires careful configuration of PFC (Priority Flow Control) and ECN (Explicit Congestion Notification) to avoid packet loss under heavy RDMA traffic. Packet loss in an RDMA fabric is catastrophic -- a single dropped packet can stall an entire all-reduce operation.</p>
 
                 <div class="callout warning">
-                    <p><strong>The topology trap:</strong> If you deploy 8 pods across 8 nodes on 4 different leaf switches, your tensor-parallel all-reduce operations are crossing leaf boundaries on every step. With a 4:1 oversubscription ratio on spine uplinks (common in commodity deployments), you have just cut your effective inter-GPU bandwidth by 75%. The model is spending more time communicating than computing.</p>
+                    <p><strong>The topology trap:</strong> If you deploy 8 pods across 8 nodes on 4 different leaf switches, your tensor-parallel all-reduce operations are crossing leaf boundaries on every step. With a 4:1 oversubscription ratio on spine uplinks (common in commodity deployments), you have just cut your effective inter-GPU bandwidth by 75%. The model is spending more time communicating than computing. You will see it as those NCCL allreduce warnings climbing from 50ms to 2,800ms -- and at that point, adding more GPUs makes your system <em>slower</em>, not faster.</p>
                 </div>
 
                 <h3>How llm-d addresses it</h3>
@@ -839,9 +1015,32 @@
 
                 <p class="failure-intro"><strong>What you see:</strong> Fifty new pods are <code>Pending</code> or <code>ContainerCreating</code> for 5+ minutes. Shared storage is pegged at 100% I/O. Existing pods start timing out on health checks.</p>
 
-                <p>Let's talk real numbers. A Llama 2 70B model in FP16 is approximately <strong>140 GB</strong> on disk. Loading that model from shared storage (NFS, Lustre, or S3) into GPU memory takes time. At a generous 2 GB/s read throughput from your storage layer, that is <strong>70 seconds per pod</strong> just for the model weight transfer. Now imagine an autoscaler decision fires and requests 50 new pods simultaneously.</p>
+                <p>This one usually hits right after the autoscaler fires. You run <code>kubectl get pods</code> and see a wall of misery:</p>
 
-                <p>Fifty pods times 140 GB equals 7 TB of data that needs to flow from your storage layer at the same time. Your NFS server's aggregate throughput might be 20 GB/s on a good day. That means the model load operation now takes <strong>350 seconds -- nearly 6 minutes</strong> -- assuming no other I/O is happening. But other I/O is happening, because your existing pods are still writing checkpoints, reading cached data, and serving requests. The storage layer becomes a bottleneck that affects not just the new pods but the health of existing ones.</p>
+                <div class="terminal-block" data-title="kubectl output -- the thundering herd in progress">
+<span class="prompt">$ kubectl get pods -n inference -l app=vllm-70b</span>
+NAME                    READY   STATUS              RESTARTS   AGE
+vllm-70b-worker-0       1/1     Running             0          3d
+vllm-70b-worker-1       1/1     Running             0          3d
+vllm-70b-worker-2       1/1     Running             <span class="warn">3</span>          3d
+vllm-70b-worker-3       1/1     Running             0          3d
+vllm-70b-worker-4       0/1     <span class="warn">ContainerCreating</span>   0          4m12s
+vllm-70b-worker-5       0/1     <span class="warn">ContainerCreating</span>   0          4m12s
+vllm-70b-worker-6       0/1     <span class="warn">ContainerCreating</span>   0          4m11s
+vllm-70b-worker-7       0/1     <span class="warn">ContainerCreating</span>   0          4m11s
+vllm-70b-worker-8       0/1     <span class="warn">Pending</span>             0          4m10s
+vllm-70b-worker-9       0/1     <span class="warn">Pending</span>             0          4m10s
+vllm-70b-worker-10      0/1     <span class="warn">Pending</span>             0          4m10s
+vllm-70b-worker-11      0/1     <span class="warn">Pending</span>             0          4m10s
+
+<span class="prompt">$ kubectl describe pod vllm-70b-worker-4 -n inference | tail -3</span>
+  <span class="warn">Warning  FailedMount  2m ago  kubelet  Unable to attach volume: timed out waiting for NFS mount</span>
+  <span class="warn">Warning  Unhealthy    45s ago kubelet  Readiness probe failed: model loading in progress (37%)</span>
+                </div>
+
+                <p>Let's talk real numbers. A Llama 2 70B model in FP16 is approximately <strong>140 GB</strong> on disk. Loading that model from shared storage (NFS, Lustre, or S3) into GPU memory takes time. At a generous 2 GB/s read throughput from your storage layer, that is <strong>70 seconds per pod</strong> just for the model weight transfer. Now imagine an autoscaler decision fires and requests 8 new pods simultaneously.</p>
+
+                <p>Eight pods times 140 GB equals over 1 TB of data that needs to flow from your storage layer at the same time. Your NFS server's aggregate throughput might be 20 GB/s on a good day. But here is the critical detail: the existing pods are also hitting that same NFS for checkpoint writes and health data. The storage layer becomes a bottleneck that affects not just the new pods but the health of existing ones -- notice the <code>RESTARTS: 3</code> on worker-2 above. That pod was healthy for three days until the thundering herd starved it of I/O.</p>
 
                 <h4>Tensor parallelism complicates loading</h4>
                 <p>When running tensor parallelism across 4 GPUs, the model is sharded -- each GPU loads a different slice of each weight tensor. All 4 GPUs must complete loading before any of them can begin serving. One slow shard blocks the entire group. And because the shards are stored as separate files (or as byte ranges in a single file), you have 4x the number of random reads against storage.</p>
@@ -857,13 +1056,25 @@
 
                 <p class="failure-intro"><strong>What you see:</strong> <code>kubectl get pods</code> takes 15 seconds to return. Pod scheduling latency goes from milliseconds to minutes. Endpoints are stale -- requests route to pods that no longer exist.</p>
 
+                <p>This is the failure mode that makes you question whether Kubernetes was the right choice (it was -- you just need to understand its limits). Your first clue is usually the API server itself starting to complain:</p>
+
+                <div class="terminal-block" data-title="Control plane under pressure">
+<span class="prompt">$ kubectl get events -n inference --sort-by='.lastTimestamp' | tail -6</span>
+<span class="warn">3m ago   Warning   FailedScheduling   pod/vllm-worker-29   0/48 nodes available: 48 Insufficient nvidia.com/gpu</span>
+<span class="warn">2m ago   Warning   FailedScheduling   pod/vllm-worker-30   0/48 nodes available: 48 Insufficient nvidia.com/gpu</span>
+<span class="err">90s ago  Warning   TooManyRequests    -                    etcd: too many requests, rate limit exceeded</span>
+<span class="err">60s ago  Warning   Timeout            -                    etcdserver: request timed out</span>
+<span class="err">45s ago  Warning   Unhealthy          endpoint/vllm-svc    endpoints failing to update: context deadline exceeded</span>
+<span class="err">30s ago  Warning   SyncError          endpointslice/vllm   failed to sync EndpointSlice: etcd timeout</span>
+                </div>
+
                 <p>The Kubernetes control plane was not designed for the pod churn rate that GPU inference at scale can generate. Here are the hard limits you will hit:</p>
 
                 <ul>
                     <li><strong>Scheduler throughput:</strong> The default Kubernetes scheduler processes approximately <strong>100 pods per second</strong>. That sounds like a lot until your autoscaler decides to add 200 inference pods and scale down 150 old ones simultaneously. The scheduler queue backs up, and new pods sit in <code>Pending</code> state for minutes.</li>
-                    <li><strong>etcd write limits:</strong> etcd, the backing store for all Kubernetes state, handles approximately <strong>10,000 writes per second</strong> before latency degrades. Each pod state transition (Pending, Scheduled, ContainerCreating, Running, Terminating) is multiple etcd writes. With rapid pod churn across hundreds of inference pods, each reporting health status and metrics, you can saturate this limit.</li>
+                    <li><strong>etcd write limits:</strong> etcd, the backing store for all Kubernetes state, handles approximately <strong>10,000 writes per second</strong> before latency degrades. Each pod state transition (Pending, Scheduled, ContainerCreating, Running, Terminating) is multiple etcd writes. With rapid pod churn across hundreds of inference pods, each reporting health status and metrics, you can saturate this limit. That <code>etcdserver: request timed out</code> error above is the canary in the coal mine.</li>
                     <li><strong>etcd value size limits:</strong> Individual values in etcd are capped at <strong>1.5 MB</strong>. A large <code>InferencePool</code> configuration with detailed routing rules, model specifications, and health thresholds for hundreds of endpoints can approach this limit. Exceeding it causes silent truncation or write failures.</li>
-                    <li><strong>Service endpoint propagation:</strong> When pods come and go, Kubernetes must update the <code>Endpoints</code> or <code>EndpointSlice</code> objects. These updates propagate to every <code>kube-proxy</code> instance on every node, which then updates iptables or IPVS rules. In a 500-node cluster with rapid pod churn, endpoint propagation can lag by <strong>30-60 seconds</strong>. During that window, traffic is being routed to pods that no longer exist.</li>
+                    <li><strong>Service endpoint propagation:</strong> When pods come and go, Kubernetes must update the <code>Endpoints</code> or <code>EndpointSlice</code> objects. These updates propagate to every <code>kube-proxy</code> instance on every node, which then updates iptables or IPVS rules. In a 500-node cluster with rapid pod churn, endpoint propagation can lag by <strong>30-60 seconds</strong>. During that window, traffic is being routed to pods that no longer exist -- and your users see <code>connection reset by peer</code> errors with no explanation.</li>
                 </ul>
 
                 <div class="callout">
@@ -889,6 +1100,21 @@
                     <li><strong>T+240s:</strong> HPA terminates 6 pods. Utilization climbs back up. The cycle repeats.</li>
                 </ol>
 
+                <p>Meanwhile, your cost dashboard tells the real story:</p>
+
+                <div class="terminal-block" data-title="GPU cost oscillation -- one week of HPA thrashing">
+<span class="prompt">$ kubectl-cost --period=7d --namespace=inference</span>
+Mon:  8 pods x 24h x $3.40/hr  =  <span class="ok">$652.80</span>
+Tue:  <span class="warn">oscillating 8-16 pods</span>      =  <span class="warn">$978.20</span>   <span class="dim">(+50% over steady-state)</span>
+Wed:  <span class="warn">oscillating 8-14 pods</span>      =  <span class="warn">$912.40</span>
+Thu:  <span class="warn">oscillating 6-16 pods</span>      =  <span class="err">$1,041.60</span>  <span class="dim">(worst day -- 6 scale events)</span>
+Fri:  8 pods x 24h x $3.40/hr  =  <span class="ok">$652.80</span>
+Sat:  4 pods x 24h x $3.40/hr  =  <span class="ok">$326.40</span>
+Sun:  4 pods x 24h x $3.40/hr  =  <span class="ok">$326.40</span>
+<span class="dim">─────────────────────────────────────────</span>
+Total:                             <span class="err">$4,890.60</span>  <span class="dim">(vs $3,264 at steady 8 pods)</span>
+                </div>
+
                 <p>This oscillation pattern is fundamentally different from CPU autoscaling for two reasons:</p>
 
                 <ul>
@@ -907,48 +1133,57 @@
 
                 <p class="failure-intro"><strong>What you see:</strong> One pod restarts, then another, then another. Within 90 seconds you go from "one pod is struggling" to "the entire fleet is down."</p>
 
-                <p>This is the boss fight. This is where failure modes 1 through 6 stop being individual problems and start being force multipliers for each other. Let me walk you through a realistic cascade scenario.</p>
+                <p>This is the boss fight. This is where failure modes 1 through 6 stop being individual problems and start being force multipliers for each other. Let me walk you through a realistic cascade scenario -- one I have seen play out in real production environments. Read it like a postmortem timeline, because that is exactly what it is.</p>
 
                 <div class="cascade-timeline">
                     <div class="cascade-step">
-                        <div class="timestamp">T+0:00</div>
-                        <div class="desc">A traffic spike hits -- maybe 30% above steady state. Not extreme. The kind of spike you see when a Slack message goes out saying "try the new AI feature."</div>
+                        <div class="timestamp">T+0:00 -- The Spark</div>
+                        <div class="desc">A traffic spike hits -- maybe 30% above steady state. Not extreme. The kind of spike you see when a Slack message goes out saying "try the new AI feature." Nothing in your alerting fires. Everything looks fine.</div>
+                        <div class="metrics">P99 latency: 340ms | Queue depth avg: 6 | Pods healthy: 8/8</div>
                     </div>
                     <div class="cascade-step">
-                        <div class="timestamp">T+0:15</div>
-                        <div class="desc">Queue depths start rising on 2 of 8 pods that received a disproportionate share of expensive requests (round-robin, Failure Mode 1). KV cache memory climbs as queued requests hold their cache slots.</div>
+                        <div class="timestamp">T+0:15 -- Uneven Distribution</div>
+                        <div class="desc">Queue depths start rising on 2 of 8 pods that received a disproportionate share of expensive requests (round-robin, Failure Mode 1). KV cache memory climbs as queued requests hold their cache slots. Your monitoring still shows "green" because it is averaging across all pods.</div>
+                        <div class="metrics">P99 latency: 780ms | Queue depth on pod-2: 34 | Queue depth on pod-5: 41 | GPU mem on pod-5: 94%</div>
                     </div>
                     <div class="cascade-step">
-                        <div class="timestamp">T+0:30</div>
-                        <div class="desc">The HPA detects high utilization and requests 4 new pods. They begin downloading the 140 GB model (Failure Mode 4). Meanwhile, the existing pods are still the only ones serving traffic.</div>
+                        <div class="timestamp">T+0:30 -- The Cavalry Is Called</div>
+                        <div class="desc">The HPA detects high utilization and requests 4 new pods. They begin downloading the 140 GB model from NFS (Failure Mode 4). The NFS throughput drops for everyone. Meanwhile, the existing 8 pods are still the only ones serving traffic, and storage I/O for KV cache checkpoints slows down.</div>
+                        <div class="metrics">P99 latency: 2,400ms | NFS throughput: saturated | New pods: 0/4 ready (downloading model)</div>
                     </div>
                     <div class="cascade-step">
-                        <div class="timestamp">T+0:45</div>
-                        <div class="desc">KV cache pressure forces evictions on the two overloaded pods (Failure Mode 2). Multi-turn conversations lose their cache state. Users retry. Retry traffic increases load by another 15%.</div>
+                        <div class="timestamp">T+0:45 -- Cache Eviction Storm</div>
+                        <div class="desc">KV cache pressure forces evictions on the two overloaded pods (Failure Mode 2). Multi-turn conversations lose their cache state. Users see slow responses and start retrying. Retry traffic increases load by another 15%. The feedback loop from Failure Mode 1 engages -- service times are climbing, which makes queue depths grow faster, which makes service times climb further.</div>
+                        <div class="metrics">P99 latency: 8,200ms | Cache hit rate: 12% (was 78%) | Retry rate: 3x baseline</div>
                     </div>
                     <div class="cascade-step critical">
-                        <div class="timestamp">T+1:00</div>
-                        <div class="desc">Pod 3 OOMs and restarts. Its traffic redistributes via round-robin to the remaining 7 pods. Three of them were already at 85% capacity. They are now above 95%.</div>
+                        <div class="timestamp">T+1:00 -- First Blood</div>
+                        <div class="desc"><code>pod/vllm-worker-5 OOMKilled</code> -- exit code 137. Its traffic redistributes via round-robin to the remaining 7 pods. Three of them were already at 85% capacity. They are now above 95%. PagerDuty fires.</div>
+                        <div class="metrics">P99 latency: 14,300ms | Pods healthy: 7/8 | New pods: 0/4 ready (model load at 40%)</div>
                     </div>
                     <div class="cascade-step critical">
-                        <div class="timestamp">T+1:15</div>
-                        <div class="desc">Pods 5 and 7 OOM. Five pods remain. The new pods are still loading the model -- they are 50 seconds into a 90-second load process. The etcd is processing a storm of pod state transitions and endpoint updates (Failure Mode 5).</div>
+                        <div class="timestamp">T+1:15 -- Domino Effect</div>
+                        <div class="desc"><code>pod/vllm-worker-2 OOMKilled</code>, <code>pod/vllm-worker-7 OOMKilled</code>. Five pods remain. The new pods are still loading the model -- they are 50 seconds into a 90-second load process. etcd is processing a storm of pod state transitions and endpoint updates (Failure Mode 5). The <code>EndpointSlice</code> controller is falling behind.</div>
+                        <div class="metrics">P99 latency: timeout | Pods healthy: 5/8 | etcd write latency: 850ms (10x normal)</div>
                     </div>
                     <div class="cascade-step critical">
-                        <div class="timestamp">T+1:30</div>
-                        <div class="desc">Endpoint propagation lag means traffic is still being routed to the 3 dead pods. Users are getting connection resets. The 5 surviving pods are at 120% of safe capacity. Two more tip over.</div>
+                        <div class="timestamp">T+1:30 -- Stale Routing</div>
+                        <div class="desc">Endpoint propagation lag means traffic is still being routed to the 3 dead pods. Users are getting <code>connection reset by peer</code> errors. The 5 surviving pods are at 120% of safe capacity. Two more tip over: <code>pod/vllm-worker-0 OOMKilled</code>, <code>pod/vllm-worker-6 OOMKilled</code>. The on-call engineer is awake now, staring at a dashboard that is mostly red.</div>
+                        <div class="metrics">P99 latency: N/A (all requests timing out) | Pods healthy: 3/8 | Connection resets: 240/sec</div>
                     </div>
                     <div class="cascade-step critical">
-                        <div class="timestamp">T+1:45</div>
-                        <div class="desc">Three pods remain. The new pods are almost ready but the surviving pods are failing health checks. The load balancer marks them unhealthy and stops sending traffic -- to all of them. The service is down.</div>
+                        <div class="timestamp">T+1:45 -- Total Collapse</div>
+                        <div class="desc">Three pods remain. The new pods are almost ready but the surviving pods are failing health checks under the load. The load balancer marks them unhealthy and stops sending traffic -- to all of them. <code>0 endpoints available for service "vllm-inference"</code>. The service is down. Every request returns <code>503 Service Unavailable</code>.</div>
+                        <div class="metrics">Pods healthy: 0/8 | New pods ready: 0/4 | Service: DOWN | Time since first alert: 105 seconds</div>
                     </div>
                     <div class="cascade-step critical">
-                        <div class="timestamp">T+2:00</div>
-                        <div class="desc">The new pods come online into a storm of backed-up requests. Without intelligent routing, they immediately receive the full backlog. Two of them OOM on the first wave. The cycle continues.</div>
+                        <div class="timestamp">T+2:00 -- The Aftershock</div>
+                        <div class="desc">The 4 new pods come online into a storm of backed-up requests -- every retry, every queued request, every health check from upstream services. Without intelligent routing, they immediately receive the full backlog. <code>pod/vllm-worker-8 OOMKilled</code>, <code>pod/vllm-worker-9 OOMKilled</code>. The cycle continues. Full recovery takes another 12 minutes of manual intervention: draining the request queue, scaling down, scaling back up one pod at a time.</div>
+                        <div class="metrics">Total outage duration: ~14 minutes | Requests lost: ~18,000 | Root cause: a 30% traffic spike</div>
                     </div>
                 </div>
 
-                <p>The blast radius expands exponentially because each failure increases load on the survivors, which increases the probability of their failure, which increases load on their survivors. A 30% traffic spike turned into a total outage in under two minutes. This is not a hypothetical. I have seen this exact sequence play out in production.</p>
+                <p>Read that timeline again. A 30% traffic spike -- not even a doubling -- turned into a total outage in under two minutes. The blast radius expanded exponentially because each failure increased load on the survivors, which increased the probability of their failure, which increased load on their survivors. This is not a hypothetical. I have seen this exact sequence play out in production.</p>
 
                 <div class="callout warning">
                     <p><strong>The core insight:</strong> Cascading failure is not a separate failure mode. It is the emergent behavior when failure modes 1 through 6 are not individually mitigated. Queue depth explosion provides the trigger. Uneven load distribution ensures the damage is concentrated. KV cache thrashing amplifies the compute cost. Slow model loading delays the cavalry. Scheduler contention prevents rapid recovery. Autoscaler oscillation means you never have the right number of pods. Remove any one of these preconditions and the cascade is survivable. Remove all of them and the cascade cannot form.</p>
@@ -1000,13 +1235,58 @@
                             <td class="gpu-range">512+</td>
                             <td>Dedicated network fabric with adaptive routing. Fat-tree topology with full bisection bandwidth. Separate fabrics for compute and serving.</td>
                             <td>Multi-cluster federation with global routing policy. Geo-aware request routing. Cross-cluster KV cache migration.</td>
-                            <td>Hierarchical scheduling (cluster → node pool → node → GPU). Multi-cluster model lifecycle management. Custom autoscaler with cost-aware scaling.</td>
+                            <td>Hierarchical scheduling (cluster, node pool, node, GPU). Multi-cluster model lifecycle management. Custom autoscaler with cost-aware scaling.</td>
                         </tr>
                     </tbody>
                 </table>
 
                 <div class="callout success">
                     <p><strong>Where llm-d shines:</strong> llm-d is designed to carry you from the 8-GPU threshold through the 512+ GPU regime without rearchitecting your serving stack at each stage. The EPP, InferencePool, and Gateway API integration provide the abstractions that scale across these thresholds. You add infrastructure underneath, but the routing and management layer remains consistent.</p>
+                </div>
+
+                <!-- ═══════════════ SURVIVAL CHECKLIST ═══════════════ -->
+                <h2 id="survival-checklist">Survival Checklist: Pre-Flight for Production Scale</h2>
+
+                <p>The scale thresholds table above tells you what changes. This checklist tells you what to <strong>actually do about it</strong> before you get paged at 2 AM. Treat this as a pre-flight checklist, not a feature list. If you cannot check every box in a tier, you are not ready to operate at that scale.</p>
+
+                <div class="checklist-tier">
+                    <h4>Before you scale past <span class="gpu-label">8 GPUs</span></h4>
+                    <ul>
+                        <li>Replace round-robin load balancing with queue-depth-aware routing (or deploy llm-d's EPP)</li>
+                        <li>Instrument <code>time_to_first_token_p99</code>, <code>request_queue_depth</code>, and <code>gpu_memory_utilization</code> per pod, not just as fleet averages</li>
+                        <li>Set up alerts on per-pod queue depth divergence -- if any single pod's queue is 5x the fleet average, your routing is broken</li>
+                        <li>Configure model caching on node-local storage (SSD or <code>tmpfs</code>) so scale-up does not hit shared storage</li>
+                        <li>Set HPA cooldown periods to at least 2x your model loading time (e.g., 3 minutes if model load takes 90 seconds)</li>
+                        <li>Test your system under 2x expected peak load. If it degrades gracefully, you are ready. If it cascades, you are not.</li>
+                    </ul>
+                </div>
+
+                <div class="checklist-tier">
+                    <h4>Before you scale past <span class="gpu-label">32 GPUs</span></h4>
+                    <ul>
+                        <li>Deploy cache-aware routing that tracks KV cache state per pod and routes multi-turn conversations to cache-warm pods</li>
+                        <li>Implement prefix-aware cache eviction -- verify that shared system prompts are not being evicted under pressure</li>
+                        <li>Ensure all tensor-parallel pod groups are co-located within the same leaf switch (run <code>kubectl get nodes -o wide</code> and map to your network topology)</li>
+                        <li>Upgrade to 100 GbE (minimum) for inter-node GPU communication; monitor NCCL allreduce latency and alert if it exceeds 100ms</li>
+                        <li>Implement health-aware draining: pods at >90% GPU memory should stop receiving new requests before they OOM</li>
+                        <li>Set up P2P or BitTorrent-style model distribution so that scaling from 8 to 16 pods does not saturate your storage layer</li>
+                        <li>Monitor etcd write latency. If it exceeds 100ms during scaling events, you are approaching control plane limits.</li>
+                        <li>Run a chaos test: kill 2 of your 8 pods simultaneously and verify the fleet absorbs the traffic without cascading</li>
+                    </ul>
+                </div>
+
+                <div class="checklist-tier">
+                    <h4>Before you scale past <span class="gpu-label">128 GPUs</span></h4>
+                    <ul>
+                        <li>Deploy a dedicated RDMA fabric (InfiniBand or RoCEv2 with PFC/ECN configured and tested) for GPU-to-GPU communication, separate from your management network</li>
+                        <li>Implement hierarchical routing with circuit breakers -- no single pod failure should be able to trigger a cascade</li>
+                        <li>Move to a federated or distributed etcd topology; a single etcd cluster will not handle the write volume from 100+ inference pods churning state</li>
+                        <li>Deploy llm-d's full stack (EPP + InferencePool + Gateway API) or equivalent -- you are past the point where custom scripts and tuned HPAs are sufficient</li>
+                        <li>Implement warm pool management with cost-aware autoscaling; you should know your cost-per-request at every scale tier</li>
+                        <li>Build a topology-aware scheduler (or scheduler extender) that understands GPU locality, NUMA domains, and network proximity</li>
+                        <li>Establish an incident runbook for cascading failure with specific manual overrides: how to drain the request queue, how to scale down safely, how to bring pods online one at a time</li>
+                        <li>Run a full cascade simulation: spike traffic 50% above peak, kill 3 pods simultaneously, and trigger a model rollout -- all at once. Your system should survive.</li>
+                    </ul>
                 </div>
 
                 <!-- ═══════════════ HOW LLM-D ADDRESSES IT ═══════════════ -->
@@ -1031,9 +1311,9 @@
 
                 <p>That is what llm-d provides, and it is why it is being built as an open project under the CNCF Sandbox -- because these problems are universal to anyone running LLM inference at scale, regardless of which model they are serving or which cloud they are running on.</p>
 
-                <p>If any of these failure modes sound familiar, you are not alone. If you are still in the POC phase, now is the time to think about what happens when you scale past one node. And if you are already in production and have the scars to prove it, llm-d was built by people who have those same scars.</p>
+                <p>If any of these failure modes sound familiar, you are not alone. If you are still in the POC phase, run through the survival checklist above before you scale past that first rack of GPUs. And if you are already in production and have the scars to prove it, llm-d was built by people who have those same scars.</p>
 
-                <p>The problems do not announce themselves politely. They arrive all at once, at 2 AM, on a Tuesday.</p>
+                <p>The problems do not announce themselves politely. They arrive all at once, at 2 AM, on a Tuesday. The question is whether your infrastructure knows what to do when they show up.</p>
 
                 <!-- CTA Section -->
                 <div class="cta-section">
