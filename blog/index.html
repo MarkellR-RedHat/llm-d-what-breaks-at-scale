@@ -658,6 +658,66 @@
             color: var(--text-code);
         }
 
+        /* ── Case Study Cards ── */
+        .case-study {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 28px 28px;
+            margin: 28px 0;
+        }
+
+        .case-study h3 {
+            margin-top: 0;
+        }
+
+        .case-study .case-meta {
+            font-family: 'Red Hat Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-amber);
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .case-study .case-resolution {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+
+        .case-study .case-resolution strong {
+            color: var(--accent-green);
+        }
+
+        /* ── Formula Blocks ── */
+        .formula-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px 24px;
+            margin: 20px 0;
+            font-family: 'Red Hat Mono', 'Courier New', monospace;
+            font-size: 0.88rem;
+            line-height: 1.8;
+            color: var(--text-code);
+            overflow-x: auto;
+        }
+
+        .formula-block .formula-label {
+            font-family: 'Red Hat Text', sans-serif;
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+            display: block;
+        }
+
         /* ── CTA Section ── */
         .cta-section {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, #0f1a2e 100%);
@@ -805,6 +865,14 @@
             .checklist-tier {
                 padding: 18px 20px;
             }
+
+            .case-study {
+                padding: 20px 18px;
+            }
+
+            .case-study .case-meta {
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -834,6 +902,7 @@
             <div class="toc-title">Contents</div>
             <ol>
                 <li><a href="#intro">Introduction</a></li>
+                <li><a href="#scale-wall">The Scale Wall</a></li>
                 <li><a href="#queue-depth">1. Queue Depth Explosion</a></li>
                 <li><a href="#kv-cache">2. KV Cache Thrashing</a></li>
                 <li><a href="#network">3. Network Topology Bottlenecks</a></li>
@@ -844,6 +913,10 @@
                 <li><a href="#real-numbers">Real Numbers: Scale Thresholds</a></li>
                 <li><a href="#survival-checklist">Survival Checklist</a></li>
                 <li><a href="#llm-d-architecture">How llm-d Addresses It All</a></li>
+                <li><a href="#case-studies">From the Trenches: 5 Case Studies</a></li>
+                <li><a href="#load-testing">Load Testing Strategies</a></li>
+                <li><a href="#graceful-degradation">Graceful Degradation</a></li>
+                <li><a href="#capacity-planning">Capacity Planning Formulas</a></li>
                 <li><a href="#conclusion">The Gap Between Demo and Production</a></li>
             </ol>
         </aside>
@@ -865,12 +938,12 @@
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
                     <span class="meta-label">Reading Time</span>
-                    <span>~20 min</span>
+                    <span>~28 min</span>
                 </div>
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
                     <span class="meta-label">Words</span>
-                    <span>~4,500</span>
+                    <span>~7,000</span>
                 </div>
                 <span class="meta-sep">|</span>
                 <div class="meta-item">
@@ -906,6 +979,37 @@
                     <p>These are the seven things that will break. And they are exactly the problems that <a href="https://llm-d.ai">llm-d</a>, a CNCF Sandbox project for distributed LLM inference routing, was built to solve.</p>
 
                     <p>Let me walk you through each one -- with the math, the metrics, the error messages, and the war stories to prove it.</p>
+                </section>
+
+                <!-- ═══════════════ THE SCALE WALL ═══════════════ -->
+                <section id="scale-wall">
+                    <h2>The Scale Wall</h2>
+
+                    <p>Before we get into the specific failure modes, it is worth understanding a concept I call <strong>the scale wall</strong>. Every distributed system hits walls at predictable orders of magnitude. Not gradual degradation. Walls. One day the system works fine; the next day, at slightly higher load, something entirely new breaks in a way you never anticipated. I have watched teams sail through single-digit GPU counts, then smash face-first into a wall the moment they crossed into double digits.</p>
+
+                    <p>For LLM serving infrastructure, there are three walls that matter.</p>
+
+                    <h3>The 10x Wall: Routing and Queue Management</h3>
+
+                    <p>The first wall hits somewhere between 8 and 32 GPUs. This is where naive load balancing stops working. At small scale, round-robin is fine because the variance between request costs washes out across a handful of pods. But at 10x, you have enough pods that statistical clustering becomes inevitable. Two or three pods accumulate expensive requests while others sit idle. Queue depths diverge. Latency percentiles split apart. Your P50 looks great while your P99 is in agony.</p>
+
+                    <p>We hit this wall on a Wednesday afternoon with 16 GPUs serving a coding assistant. The median response was 280ms. The 99th percentile was 14 seconds. Users were not complaining about the service being slow; they were complaining that it was "random." Sometimes fast, sometimes unusable. That randomness was the routing layer failing to account for request cost. We learned the hard way that queue-aware routing is not an optimization at this scale. It is a requirement.</p>
+
+                    <h3>The 100x Wall: Cache Coherence and Network Fabric</h3>
+
+                    <p>The second wall hits between 64 and 128 GPUs, and it is a fundamentally different beast. At this scale, you are almost certainly running tensor parallelism across nodes, which means your GPUs are talking to each other constantly. The network fabric becomes as important as the GPUs themselves. A single misconfigured switch, a single oversubscribed uplink, a single ECMP hash collision that sends two all-reduce flows down the same path; any one of these can cut your effective throughput in half.</p>
+
+                    <p>The cache problem changes character here too. You now have dozens of pods with independent KV caches, and the probability that a returning user's conversation state lives on the pod that receives their next request drops below 10% without cache-aware routing. You start burning 30-40% of your total GPU compute on redundant prefill operations. The dashboard shows high GPU utilization, and you think the system is working hard. It is. But half that work is wasted.</p>
+
+                    <h3>The 1000x Wall: Control Plane Architecture and Multi-Cluster Federation</h3>
+
+                    <p>The third wall hits at 512+ GPUs, and it is the one that forces an architectural rethink. A single Kubernetes cluster starts groaning under the weight of pod state transitions, endpoint updates, and scheduler decisions. The etcd backing store hits write limits during scaling events. Your control plane, the thing that is supposed to manage the system, becomes the bottleneck that destabilizes it.</p>
+
+                    <p>At this scale, you need multi-cluster federation, hierarchical scheduling, and a routing layer that can make decisions across cluster boundaries. The requests-per-second capacity of your control plane matters as much as the tokens-per-second capacity of your GPUs. I have seen teams with 800 GPUs and plenty of compute headroom brought to their knees by an etcd cluster that could not keep up with the state changes from a single scaling event.</p>
+
+                    <div class="callout">
+                        <p><strong>Why the walls matter:</strong> Each wall requires a different category of solution. You cannot patch your way past a wall with the same tools that got you to it. The 10x wall needs smart routing. The 100x wall needs network architecture and distributed caching. The 1000x wall needs a fundamentally different control plane. llm-d was designed with all three walls in mind, providing abstractions that evolve with your scale rather than forcing you to rearchitect at each threshold.</p>
+                    </div>
                 </section>
 
                 <!-- ═══════════════ FAILURE MODE 1 ═══════════════ -->
@@ -1303,6 +1407,201 @@ Total:                             <span class="err">$4,890.60</span>  <span cla
                 <p><strong>Health-aware routing with graduated draining</strong> is the mechanism that prevents failure mode 7 (cascading failure). Instead of a binary healthy/unhealthy check, the EPP implements a gradient: pods under moderate pressure get fewer requests, pods near their limits get none, and pods that are failing are drained gracefully. This prevents the "one pod fails and the survivors immediately overload" dynamic that drives cascading failure.</p>
 
                 <p>The design philosophy behind all of these components is the same: <strong>the infrastructure layer between users and models must understand what LLM inference actually needs</strong>. Standard Kubernetes primitives -- Services, Ingresses, HPAs -- were designed for stateless HTTP microservices. LLM inference is stateful (KV cache), asymmetric (requests have wildly different costs), memory-intensive, and latency-sensitive in ways that traditional web services are not. llm-d bridges that gap.</p>
+
+                <!-- ═══════════════ CASE STUDIES ═══════════════ -->
+                <h2 id="case-studies">From the Trenches: 5 Failure Case Studies</h2>
+
+                <p>Theory is useful. Postmortems are better. Here are five real-world failure scenarios drawn from production deployments. Names and identifying details have been changed, but the metrics, the timelines, and the lessons are real. Each one left scars.</p>
+
+                <div class="case-study">
+                    <h3>Case Study 1: The Black Friday KV Cache Meltdown</h3>
+                    <div class="case-meta">
+                        <span>Company: Meridian Retail (e-commerce)</span>
+                        <span>Scale: 64 A100 GPUs</span>
+                        <span>Model: Fine-tuned 13B product assistant</span>
+                    </div>
+                    <p>At 3 AM on Black Friday, Meridian's AI shopping assistant started giving customers product descriptions from the wrong categories. Handbags described as power tools. Running shoes with nutritional information. The engineering team initially thought the model had corrupted weights, but the truth was worse.</p>
+                    <p>Traffic had tripled over two hours. The KV cache hit 98% utilization across all pods, triggering aggressive eviction. But the eviction policy was pure LRU with no prefix awareness. Meridian's system prompt included a 1,200-token product catalog context that was shared across every conversation. When that shared prefix was evicted, every active session lost its cache state simultaneously. The prefill storm consumed 78% of available GPU compute. Response latency jumped from 340ms to 9.2 seconds. The autoscaler saw high GPU utilization and added 12 more pods, which triggered a thundering herd against their NFS server. The NFS server hit 100% I/O utilization, and existing pods started failing health checks because they could not write cache checkpoints.</p>
+                    <p><strong>Total impact:</strong> 47 minutes of degraded service. 23% of sessions served incorrect context. Estimated revenue impact: $2.1M in abandoned carts during peak shopping hours.</p>
+                    <div class="case-resolution">
+                        <p><strong>Resolution:</strong> Meridian deployed prefix-aware cache eviction that pinned the shared product catalog prefix in cache. They implemented cache-aware routing via llm-d's EPP so returning customers hit the pod that held their session state. They moved model weights to node-local NVMe storage and eliminated the NFS dependency for model loading. Post-fix, the same traffic pattern produced zero cache-related incidents across Cyber Monday and the following holiday season.</p>
+                    </div>
+                </div>
+
+                <div class="case-study">
+                    <h3>Case Study 2: The Chatbot That Ate Its Own Queue</h3>
+                    <div class="case-meta">
+                        <span>Company: Lakeshore Financial (enterprise)</span>
+                        <span>Scale: 24 H100 GPUs</span>
+                        <span>Model: 70B compliance assistant</span>
+                    </div>
+                    <p>Lakeshore deployed an internal compliance chatbot for their loan officers. It worked beautifully in the pilot with 50 users. Then they rolled it out company-wide to 3,000 loan officers on a Monday morning. By 9:15 AM, the chatbot was unusable.</p>
+                    <p>The root cause was deceptively simple. When the chatbot returned a slow response, the frontend UI showed a spinning indicator. Loan officers, trained to click again when things stall, would close the tab and open a new one. The frontend did not cancel the original request. So every slow response generated a retry, which added load, which made responses slower, which generated more retries. Within 20 minutes, the system was processing 4x the actual user demand because 75% of in-flight requests were orphaned retries that nobody was waiting for.</p>
+                    <p>The queue depth on two pods hit 340 pending requests. The P99 latency was 45 seconds. The system was technically "up" since pods were not crashing, but it was functionally dead. No loan officer was willing to wait 45 seconds for a compliance answer.</p>
+                    <p><strong>Total impact:</strong> 3 hours of unusable service on launch day. 2,200 support tickets. The project was nearly canceled by executive leadership.</p>
+                    <div class="case-resolution">
+                        <p><strong>Resolution:</strong> Three changes saved the project. First, they implemented request deadlines: any request older than 15 seconds was automatically shed from the queue, freeing capacity for fresh requests. Second, the frontend was updated to cancel in-flight requests when a user navigated away. Third, they deployed llm-d's EPP with queue-depth-aware routing, which prevented the 340-request pileup on individual pods. Post-fix, the system handled 3,000 concurrent users with a P99 of 2.8 seconds.</p>
+                    </div>
+                </div>
+
+                <div class="case-study">
+                    <h3>Case Study 3: The Silent Network Partition</h3>
+                    <div class="case-meta">
+                        <span>Company: Stratos Labs (AI research)</span>
+                        <span>Scale: 128 A100 GPUs across 4 racks</span>
+                        <span>Model: 70B with 8-way tensor parallelism</span>
+                    </div>
+                    <p>The dashboard turned red in a pattern I had never seen before. Half the pods were reporting normal latency. The other half were timing out. But the split was not random. It was perfectly correlated with rack placement.</p>
+                    <p>Stratos was running 8-way tensor parallelism across nodes in different racks. A firmware update on one of the spine switches had silently changed the ECN marking threshold from 100KB to 10MB. RoCEv2 traffic between racks 2 and 4 was experiencing 0.3% packet loss, which does not sound like much until you realize that a single dropped packet in an all-reduce operation stalls every GPU in the tensor-parallel group for the full NCCL timeout (30 seconds by default). The pods were not crashing. They were spending 90% of their time waiting for retransmissions that the network should have prevented.</p>
+                    <p>Effective throughput on the affected pods dropped from 1,200 tokens per second to 80 tokens per second. The monitoring system showed GPU utilization at 95%, which looked healthy. But the GPUs were not computing; they were stalled, waiting on network operations that were being silently corrupted.</p>
+                    <p><strong>Total impact:</strong> 6 hours of 15x degraded throughput on half the fleet. The switch firmware issue was not detected for 4 hours because GPU utilization metrics looked normal.</p>
+                    <div class="case-resolution">
+                        <p><strong>Resolution:</strong> Stratos added NCCL allreduce latency as a first-class monitoring metric with alerts at the 100ms threshold. They deployed llm-d's topology-aware scheduling to ensure tensor-parallel groups stayed within a single rack, eliminating cross-rack all-reduce operations entirely. They also implemented a pre-deployment network validation check that runs synthetic RDMA traffic across all rack boundaries and alerts on any packet loss above 0.01%. The firmware issue was rolled back within an hour of detection.</p>
+                    </div>
+                </div>
+
+                <div class="case-study">
+                    <h3>Case Study 4: The Autoscaler Death Spiral</h3>
+                    <div class="case-meta">
+                        <span>Company: NovaBridge SaaS (multi-tenant platform)</span>
+                        <span>Scale: 48 A100 GPUs</span>
+                        <span>Model: Multiple models, 7B to 70B</span>
+                    </div>
+                    <p>NovaBridge offered LLM inference as a managed service. Their autoscaler was configured to scale on GPU utilization with a 70% target. On a Thursday afternoon, one of their larger tenants kicked off a batch processing job that sent 10,000 requests in 5 minutes. The autoscaler responded correctly, scaling from 12 to 24 pods. But then the batch job finished.</p>
+                    <p>GPU utilization dropped to 25%. The autoscaler began scaling down. It terminated 8 pods. But those 8 pods had warm KV caches for the other tenants' ongoing conversations. Suddenly, cache hit rates across the platform dropped from 72% to 18%. Prefill compute spiked. GPU utilization climbed back to 85%. The autoscaler scaled back up. Eight new pods came online with cold caches. The warm cache state was permanently lost.</p>
+                    <p>This cycle repeated four times in 90 minutes. Each cycle, more conversation state was destroyed by scale-down events, and the subsequent scale-up never restored it. The platform's effective throughput during the oscillation was 40% lower than steady-state, despite having the same average number of GPUs.</p>
+                    <p><strong>Total impact:</strong> 90 minutes of degraded performance across all tenants. GPU costs for the day were 2.3x the baseline due to oscillation. Three enterprise customers filed SLA violation complaints.</p>
+                    <div class="case-resolution">
+                        <p><strong>Resolution:</strong> NovaBridge made three architectural changes. They switched their autoscaler signal from raw GPU utilization to llm-d's weighted queue depth metric, which accounts for cache state and does not spike on prefill-heavy workloads. They implemented a 10-minute cooldown window on scale-down (up from the default 5 minutes) and added a rule that scale-down events could not remove more than 25% of the fleet at once. Finally, they deployed cache-aware draining: before a pod was terminated, its active conversation state was migrated to a surviving pod's host memory cache, preserving cache warmth across scale events.</p>
+                    </div>
+                </div>
+
+                <div class="case-study">
+                    <h3>Case Study 5: The Model Update That Took Down Production</h3>
+                    <div class="case-meta">
+                        <span>Company: Clearpath Health (healthcare AI)</span>
+                        <span>Scale: 32 H100 GPUs</span>
+                        <span>Model: Fine-tuned 13B clinical assistant</span>
+                    </div>
+                    <p>At 2 AM on a Tuesday (it is always 2 AM on a Tuesday), Clearpath's CI/CD pipeline triggered a model update. The new model checkpoint was 3% larger due to additional fine-tuning layers. The rolling update strategy was simple: terminate one pod, start a new one with the new model, wait for it to be healthy, move to the next pod.</p>
+                    <p>The problem was that the new model's memory footprint, while only 3% larger in weights, required 11% more KV cache memory because the fine-tuning had added attention heads. The first 6 pods updated successfully. Pod 7 loaded the new model, started serving, and immediately hit 96% GPU memory. It began evicting KV cache aggressively. Pods 1 through 6 (already on the new model) were experiencing the same pressure but had not yet shown symptoms because traffic was light.</p>
+                    <p>Then morning traffic arrived at 7 AM. All 8 updated pods simultaneously hit their memory ceiling. KV cache eviction rates spiked. Prefill compute consumed 60% of GPU cycles. The remaining 4 pods on the old model were healthy but running a different model version, so the routing layer could not mix traffic between old and new model pods. Effectively, only 8 pods were serving the new model, and those 8 pods needed 10 pods' worth of GPU memory.</p>
+                    <p><strong>Total impact:</strong> 4 hours of degraded performance during peak clinical hours. Time to first token went from 180ms to 6.4 seconds. The compliance team flagged the incident because clinical decision support latency exceeded their SLA of 3 seconds.</p>
+                    <div class="case-resolution">
+                        <p><strong>Resolution:</strong> Clearpath implemented a three-stage model deployment process. Stage one: deploy the new model to a canary pool of 2 pods and run a synthetic load test that measures actual GPU memory consumption under realistic KV cache pressure, not just model weight size. Stage two: if the canary passes, roll out to 50% of the fleet with automatic rollback if P99 latency exceeds 2x the baseline. Stage three: complete the rollout with a 30-minute bake period before removing the old model pods. They also added a pre-deployment memory audit that calculates <code>model_weights + max_kv_cache_at_target_concurrency</code> and rejects any model that exceeds 88% of available VRAM.</p>
+                    </div>
+                </div>
+
+                <!-- ═══════════════ LOAD TESTING ═══════════════ -->
+                <h2 id="load-testing">Load Testing Strategies for LLM Inference</h2>
+
+                <p>Every team I have worked with has the same regret after their first production outage: "We should have load tested more aggressively." The problem is that most teams load test their LLM deployments the same way they load test web APIs. They throw a fixed rate of identical requests at the endpoint and check if latency stays below a threshold. That approach misses every failure mode in this article.</p>
+
+                <p>LLM inference load testing requires a fundamentally different approach because the workload is fundamentally different. Here is what actually works.</p>
+
+                <h3>The Right Tools</h3>
+
+                <p><strong>k6</strong> (from Grafana Labs) is my go-to for LLM load testing because of its scriptable scenarios and built-in support for streaming responses. You can write a k6 script that simulates multi-turn conversations, varying prompt lengths, and realistic think time between messages. The key feature is scenario-based testing: you can define "20% of users send long documents, 60% send short questions, 20% are multi-turn conversations" and run all three simultaneously.</p>
+
+                <p><strong>Locust</strong> is better when you need to simulate complex user behavior patterns. Its Python-based task definitions make it straightforward to implement conversation flows where each user's next request depends on the model's previous response. I have used Locust to simulate the "retry storm" pattern from Case Study 2 by programming users that re-send requests when latency exceeds a threshold.</p>
+
+                <p><strong>vegeta</strong> is the right choice for raw throughput testing. When you need to answer "what is the absolute maximum requests per second this cluster can handle before it falls over," vegeta's constant-rate attack mode will find that number. It is less useful for realistic workload simulation but invaluable for finding hard limits.</p>
+
+                <h3>Testing Patterns That Actually Find Bugs</h3>
+
+                <p><strong>The Ramp-to-Failure Test.</strong> Start at 10% of expected peak load. Increase by 10% every 5 minutes. Do not stop when latency starts degrading. Keep going until something breaks. The goal is not to pass a test; it is to find your breaking point before production finds it for you. Record the exact load level where P99 latency goes non-linear. That is your true capacity ceiling, and it is almost always 30-40% below what your napkin math predicted.</p>
+
+                <p><strong>The Burst Test.</strong> Run steady-state load, then inject a 3x traffic spike for 60 seconds. Watch what happens during the spike, but more importantly, watch what happens <em>after</em> the spike ends. A healthy system returns to baseline within 30 seconds. A system with queue depth issues takes 5-10 minutes to drain its backlog. A system with cascading failure tendencies never recovers without manual intervention.</p>
+
+                <p><strong>The Chaos Injection Test.</strong> Under moderate load, kill 25% of your pods simultaneously. This simulates the "first blood" moment from the cascading failure timeline. Your remaining pods should absorb the traffic without any of them exceeding 90% GPU memory. If they do, your fleet is too close to capacity and your safety margin is insufficient.</p>
+
+                <p><strong>The Cache Pollution Test.</strong> Send 10,000 unique, non-repeating prompts to measure performance without any cache benefits. Then switch to a realistic workload with multi-turn conversations and shared system prompts. The delta between these two scenarios tells you how dependent your performance is on cache hit rates, and therefore how vulnerable you are to cache thrashing under pressure.</p>
+
+                <div class="callout">
+                    <p><strong>The load testing rule of thumb:</strong> If your load test does not make you uncomfortable, it is not aggressive enough. The test that makes your on-call engineer nervous at 2 PM is the test that saves them from a real incident at 2 AM. Test at 2x your expected peak, test with chaos, test with realistic workload distributions. The failure modes in this article are not theoretical. They are waiting for the right conditions, and load testing is how you create those conditions on your terms.</p>
+                </div>
+
+                <!-- ═══════════════ GRACEFUL DEGRADATION ═══════════════ -->
+                <h2 id="graceful-degradation">Graceful Degradation: When You Cannot Scale Fast Enough</h2>
+
+                <p>Sometimes the traffic arrives faster than you can add capacity. The autoscaler fires, but model loading takes 90 seconds, and the cascade is already underway. This is where graceful degradation separates production-grade systems from demo-grade systems. The question is not "can we handle this load?" The question is "what do we do when we cannot?"</p>
+
+                <p>We learned this lesson the hard way during a product launch. Traffic spiked 5x in under three minutes. Our autoscaler responded correctly, but the new pods would not be ready for 90 seconds. We had 90 seconds of 5x load on infrastructure sized for 1x. Without a degradation strategy, the entire system would have collapsed. Here is what we built afterward.</p>
+
+                <h3>Request Shedding</h3>
+
+                <p>When queue depths exceed a configurable threshold, new requests are rejected immediately with a <code>429 Too Many Requests</code> response instead of being queued. This sounds brutal, but the alternative is worse. Queuing a request you cannot serve for 30 seconds does not help the user. It consumes GPU memory for the pending KV cache allocation, makes every other queued request slower, and returns a timeout that the client treats as an error anyway. A fast rejection lets the client retry intelligently, display a "service is busy" message, or fall back to an alternative. The key is setting the shedding threshold correctly. Too aggressive and you reject requests you could have served. Too permissive and you are back to queue depth explosion.</p>
+
+                <h3>Quality Tiering: Smaller Model Fallback</h3>
+
+                <p>This is the most effective degradation strategy I have seen in production. When load exceeds primary model capacity, overflow traffic is routed to a smaller, faster model. A 70B model might produce the best responses, but a 7B model running on the same GPU can handle 8x the throughput. The responses are less nuanced, but they are fast and functional. Users get a slightly lower quality response in 400ms instead of a timeout in 30 seconds, or worse, no response at all.</p>
+
+                <p>The implementation requires maintaining a warm pool of fallback model pods, which costs money during normal operations. But the alternative is a total outage during traffic spikes, which costs far more. In practice, the fallback model handles 5-10% of total traffic during peak hours, and the cost of maintaining that warm pool is roughly 15% of the primary fleet's GPU cost.</p>
+
+                <h3>Priority Queues</h3>
+
+                <p>Not all requests are equal. A paying enterprise customer's request is worth more than a free-tier exploration query. A clinical decision support query in a healthcare application is more urgent than a "summarize this article" request. Priority queues let you guarantee latency for high-priority traffic even when the system is under pressure, by shedding lower-priority requests first.</p>
+
+                <p>The implementation is straightforward: tag each request with a priority level at the gateway, and configure the EPP to route high-priority requests to reserved capacity. During normal operations, the reserved capacity handles overflow from the general pool. During overload, the general pool sheds requests while the reserved pool continues serving priority traffic at target latency.</p>
+
+                <h3>Circuit Breakers</h3>
+
+                <p>A circuit breaker monitors error rates and latency on downstream services. When failures exceed a threshold, the circuit "opens" and stops sending traffic to the failing component. This prevents the cascading failure pattern from section 7. Without circuit breakers, a single unhealthy pod continues receiving traffic, fails to respond, and the retry storms from upstream services amplify the failure. With circuit breakers, the unhealthy pod is removed from rotation within seconds, and traffic redistributes to healthy pods proportionally.</p>
+
+                <p>The critical configuration parameters are the failure threshold (what error rate triggers the circuit), the open duration (how long to stop sending traffic), and the half-open behavior (how to test whether the downstream service has recovered). For LLM inference, I set the failure threshold at 3 consecutive timeouts or a 50% error rate over a 10-second window. The open duration is 30 seconds, which is long enough for a struggling pod to drain its queue but short enough to restore capacity quickly if the issue was transient.</p>
+
+                <div class="callout warning">
+                    <p><strong>The degradation hierarchy:</strong> When load exceeds capacity, apply these strategies in order. First, activate priority queues to protect your most important traffic. Second, begin shedding low-priority requests. Third, route overflow to fallback models. Fourth, if even the fallback models are saturated, open circuit breakers on the most stressed pods and let them recover. Each layer buys you time. Time for the autoscaler to add capacity. Time for the traffic spike to subside. Time for the on-call engineer to intervene. The system degrades gracefully instead of collapsing catastrophically.</p>
+                </div>
+
+                <!-- ═══════════════ CAPACITY PLANNING ═══════════════ -->
+                <h2 id="capacity-planning">Capacity Planning Formulas</h2>
+
+                <p>The war stories above share a common theme: teams that got surprised by the math. Capacity planning for LLM inference is not guesswork. These are the formulas I use to size deployments, and they have saved me from more incidents than any monitoring dashboard.</p>
+
+                <h3>GPU Count Estimation</h3>
+
+                <p>Start here. This formula gives you the minimum number of GPUs needed to sustain your target request rate:</p>
+
+                <div class="formula-block">
+                    <span class="formula-label">GPU Count</span>
+GPUs_needed = (peak_rps * avg_tokens_per_request) / (tokens_per_second_per_gpu * target_utilization)
+                </div>
+
+                <p>The critical variable is <code>target_utilization</code>. Never set this above 0.7. At 80% utilization, you have no headroom for traffic spikes. At 90%, you are one bad minute away from queue depth explosion. I use 0.6 for production systems that need to absorb unexpected bursts, and 0.7 for systems with predictable, steady-state traffic. For example: 100 peak RPS, 500 average tokens per request, 2,000 tokens per second per GPU (typical for a 70B model on an H100), target utilization of 0.65. That gives you <code>(100 * 500) / (2000 * 0.65) = 38.5</code>, rounded up to 40 GPUs. Add 20% for the headroom your load tests will prove you need, and you land at 48.</p>
+
+                <h3>Memory Sizing</h3>
+
+                <p>GPU memory is the resource that kills you silently. Model weights are the obvious consumer, but KV cache memory is the variable that determines how many concurrent requests you can actually serve:</p>
+
+                <div class="formula-block">
+                    <span class="formula-label">VRAM Required per GPU</span>
+VRAM_needed = model_params * bytes_per_param + kv_cache_per_seq * max_concurrent_seqs
+                </div>
+
+                <p>For a 70B parameter model in FP16 (2 bytes per parameter), the model weights consume 140 GB. Spread across 4 GPUs with tensor parallelism, that is 35 GB per GPU. On an 80 GB A100, you have 45 GB remaining for KV cache. At 2.6 MB per token and a 4K context window, each active sequence needs roughly 10.5 GB of KV cache. That means each GPU can hold approximately 4 concurrent long-context sequences. With 4 GPUs, your maximum concurrency for long-context requests is 16. If your queue depth exceeds 16, you are evicting caches. Plan accordingly.</p>
+
+                <h3>Network Bandwidth</h3>
+
+                <p>For tensor-parallel inference across nodes, the all-reduce communication bandwidth determines whether your GPUs are computing or waiting:</p>
+
+                <div class="formula-block">
+                    <span class="formula-label">Network Bandwidth</span>
+BW_needed = num_gpus * tensor_parallel_degree * gradient_size * 2 / allreduce_time
+
+Example: 8 GPUs, TP=8, hidden_dim=8192, FP16
+  gradient_size = 8192 * 2 bytes = 16 KB per layer
+  allreduce per step = 80 layers * 16 KB * 2 (ring allreduce) = 2.56 MB
+  target allreduce_time = 1ms
+  BW_needed = 2.56 MB / 0.001s = 2.56 GB/s = ~20.5 Gbps per GPU pair
+  Total fabric BW for 8 GPUs = ~164 Gbps minimum
+                </div>
+
+                <p>That 164 Gbps is the minimum for the all-reduce to not be the bottleneck. In practice, you want 2x headroom because network traffic is bursty and other operations (KV cache transfers, health checks, metrics) share the fabric. This is why 100 GbE is the minimum for multi-node tensor parallelism, and why serious deployments run 400 Gbps InfiniBand.</p>
+
+                <div class="callout success">
+                    <p><strong>The planning rule:</strong> Run these formulas, add 20% headroom, then validate with the load testing strategies above. The formulas give you a starting point. The load tests tell you whether your starting point was right. If your load test breaks the system at 70% of the capacity your formulas predicted, investigate the gap. It is usually the KV cache memory constraint or network bandwidth that the formulas underestimated. Adjust and re-test until the math matches reality.</p>
+                </div>
 
                 <!-- ═══════════════ CONCLUSION ═══════════════ -->
                 <h2 id="conclusion">The Gap Between Demo and Production</h2>

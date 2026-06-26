@@ -374,6 +374,526 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ============================================================
+   Collapsible Section (shared)
+   ============================================================ */
+.collapsible-section {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); margin-top: 16px; overflow: hidden;
+}
+.collapsible-toggle {
+  width: 100%; padding: 14px 20px; background: none; border: none;
+  color: var(--text2); font-family: var(--head); font-weight: 700;
+  font-size: 0.82rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+.collapsible-toggle:hover { color: var(--text); }
+.collapsible-toggle .section-icon { margin-right: 10px; font-size: 1rem; }
+.collapsible-toggle .toggle-left { display: flex; align-items: center; }
+.collapsible-arrow { transition: transform 0.3s; font-size: 0.7rem; }
+.collapsible-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.collapsible-body.open { max-height: 8000px; }
+.collapsible-content { padding: 0 20px 20px; }
+
+/* ============================================================
+   Feature 1: Scale Simulator
+   ============================================================ */
+.ss-controls { margin-bottom: 16px; }
+.ss-slider-wrap {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 8px;
+}
+.ss-slider-wrap label {
+  font-size: 0.78rem; color: var(--text2); white-space: nowrap; min-width: 40px;
+}
+.ss-slider {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 6px; background: var(--border); border-radius: 3px;
+  outline: none; cursor: pointer;
+}
+.ss-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px;
+  background: var(--accent); border-radius: 50%; cursor: pointer;
+  box-shadow: 0 0 8px var(--accent-dim);
+}
+.ss-slider::-moz-range-thumb {
+  width: 18px; height: 18px; background: var(--accent);
+  border-radius: 50%; border: none; cursor: pointer;
+}
+.ss-rps-display {
+  font-family: var(--mono); font-size: 1.6rem; font-weight: 700;
+  color: var(--accent); min-width: 100px; text-align: right;
+}
+.ss-rps-unit { font-size: 0.7rem; color: var(--text3); margin-left: 4px; }
+
+/* Infrastructure diagram */
+.ss-infra {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin-bottom: 16px;
+}
+@media (max-width: 800px) { .ss-infra { grid-template-columns: repeat(2, 1fr); } }
+.ss-component {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 12px; position: relative;
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+.ss-component.healthy { border-color: rgba(34,197,94,0.4); }
+.ss-component.warning {
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 12px rgba(245,158,11,0.1);
+}
+.ss-component.critical {
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 16px rgba(239,68,68,0.15);
+  animation: ssPulse 1.5s ease-in-out infinite;
+}
+@keyframes ssPulse {
+  0%,100% { box-shadow: 0 0 8px rgba(239,68,68,0.1); }
+  50% { box-shadow: 0 0 20px rgba(239,68,68,0.3); }
+}
+.ss-comp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ss-comp-name {
+  font-family: var(--head); font-size: 0.72rem; font-weight: 700;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.ss-health-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  transition: background 0.4s;
+}
+.ss-health-dot.green { background: var(--green); }
+.ss-health-dot.amber { background: var(--amber); }
+.ss-health-dot.red { background: var(--red); }
+.ss-capacity-bar {
+  height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px;
+  overflow: hidden;
+}
+.ss-capacity-fill {
+  height: 100%; border-radius: 3px; transition: width 0.5s, background 0.4s;
+}
+.ss-capacity-pct {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--text3);
+  margin-top: 4px; text-align: right;
+}
+
+/* System failure overlay */
+.ss-failure-overlay {
+  display: none; position: relative; margin-top: 12px;
+  padding: 16px; text-align: center;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--r); animation: ssFailFlash 0.8s ease-in-out infinite;
+}
+.ss-failure-overlay.show { display: block; }
+@keyframes ssFailFlash {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.ss-failure-text {
+  font-family: var(--head); font-weight: 900; font-size: 1.2rem;
+  color: var(--red); text-transform: uppercase; letter-spacing: 0.15em;
+}
+
+/* Breaking point log */
+.ss-log {
+  margin-top: 12px; background: var(--bg-panel); border-radius: var(--r-sm);
+  padding: 12px 14px; max-height: 200px; overflow-y: auto;
+}
+.ss-log-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.72rem;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.ss-log-entry {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid rgba(26,34,53,0.4);
+  font-size: 0.72rem;
+}
+.ss-log-entry:last-child { border-bottom: none; }
+.ss-log-comp { color: var(--text2); }
+.ss-log-rps { font-family: var(--mono); color: var(--amber); }
+.ss-log-status { font-family: var(--mono); font-weight: 700; }
+.ss-log-status.amber { color: var(--amber); }
+.ss-log-status.red { color: var(--red); }
+
+/* ============================================================
+   Feature 2: Breaking Point Catalog
+   ============================================================ */
+.bp-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 1000px) { .bp-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .bp-grid { grid-template-columns: 1fr; } }
+.bp-card {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r); cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+.bp-card:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-dim); }
+.bp-card-header { padding: 14px 16px; }
+.bp-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.bp-icon {
+  font-size: 1.4rem; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-dim); border-radius: var(--r-sm);
+  margin-right: 10px; flex-shrink: 0;
+}
+.bp-title-wrap { display: flex; align-items: center; flex: 1; }
+.bp-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.85rem; color: var(--text);
+}
+.bp-severity {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px; flex-shrink: 0;
+}
+.bp-severity.critical { background: var(--red-dim); color: var(--red); }
+.bp-severity.high { background: var(--amber-dim); color: var(--amber); }
+.bp-severity.medium { background: rgba(6,182,212,0.12); color: var(--cyan); }
+.bp-expand-hint {
+  font-size: 0.68rem; color: var(--text3); margin-top: 4px;
+}
+.bp-details {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bp-card.expanded .bp-details { max-height: 600px; }
+.bp-details-inner {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.bp-section-label {
+  font-family: var(--head); font-weight: 700; font-size: 0.7rem;
+  color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em;
+  margin-top: 12px; margin-bottom: 6px;
+}
+.bp-details ul {
+  list-style: none; padding: 0;
+}
+.bp-details ul li {
+  font-size: 0.75rem; color: var(--text2); line-height: 1.6;
+  padding-left: 14px; position: relative;
+}
+.bp-details ul li::before {
+  content: '\2022'; position: absolute; left: 0; color: var(--text3);
+}
+.bp-details p {
+  font-size: 0.75rem; color: var(--text2); line-height: 1.6; margin: 0;
+}
+.bp-details code {
+  font-family: var(--mono); font-size: 0.7rem;
+  background: rgba(59,130,246,0.1); color: var(--cyan);
+  padding: 1px 5px; border-radius: 3px;
+}
+.bp-metrics-list {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+}
+
+/* ============================================================
+   Feature 3: Scaling Readiness Assessment
+   ============================================================ */
+.sra-container { max-width: 700px; }
+.sra-progress-wrap { margin-bottom: 20px; }
+.sra-progress-bar {
+  height: 8px; background: var(--border); border-radius: 4px;
+  overflow: hidden; margin-bottom: 6px;
+}
+.sra-progress-fill {
+  height: 100%; background: var(--accent); border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.sra-progress-text {
+  font-family: var(--mono); font-size: 0.7rem; color: var(--text3);
+  text-align: right;
+}
+.sra-question-card {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 20px; margin-bottom: 12px;
+}
+.sra-q-number {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+  margin-bottom: 6px;
+}
+.sra-q-text {
+  font-family: var(--head); font-weight: 700; font-size: 0.88rem;
+  color: var(--text); margin-bottom: 14px; line-height: 1.4;
+}
+.sra-options { display: flex; flex-direction: column; gap: 8px; }
+.sra-option {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 14px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-size: 0.78rem; color: var(--text2); line-height: 1.4;
+}
+.sra-option:hover { border-color: var(--accent); }
+.sra-option.selected {
+  border-color: var(--accent); background: var(--accent-dim);
+  color: var(--text);
+}
+.sra-option-radio {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--text3); flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s;
+}
+.sra-option.selected .sra-option-radio {
+  border-color: var(--accent);
+}
+.sra-option.selected .sra-option-radio::after {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+}
+.sra-nav { display: flex; gap: 10px; margin-top: 16px; }
+
+/* Results */
+.sra-results { display: none; }
+.sra-results.show { display: block; }
+.sra-score-display {
+  text-align: center; padding: 30px 20px; margin-bottom: 20px;
+  background: var(--bg-panel); border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+.sra-score-number {
+  font-family: var(--head); font-weight: 900; font-size: 3rem;
+  line-height: 1;
+}
+.sra-score-max {
+  font-family: var(--mono); font-size: 1rem; color: var(--text3);
+}
+.sra-score-rating {
+  font-family: var(--head); font-weight: 700; font-size: 1rem;
+  margin-top: 10px;
+}
+.sra-breakdown {
+  background: var(--bg-panel); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 16px;
+}
+.sra-breakdown-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.78rem;
+  text-transform: uppercase; color: var(--text3); letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.sra-breakdown-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid rgba(26,34,53,0.4);
+}
+.sra-breakdown-row:last-child { border-bottom: none; }
+.sra-breakdown-area { font-size: 0.75rem; color: var(--text2); }
+.sra-breakdown-score {
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+}
+.sra-breakdown-score.good { color: var(--green); }
+.sra-breakdown-score.ok { color: var(--accent); }
+.sra-breakdown-score.warn { color: var(--amber); }
+.sra-breakdown-score.bad { color: var(--red); }
+
+/* ============================================================
+   Feature 4: Infrastructure Overview Diagram
+   ============================================================ */
+.io-diagram {
+  position: relative; padding: 20px 0;
+}
+.io-layer {
+  display: flex; justify-content: center; gap: 12px;
+  margin-bottom: 8px; flex-wrap: wrap; position: relative;
+}
+.io-node {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 16px;
+  text-align: center; position: relative; min-width: 100px;
+  transition: border-color 0.4s, box-shadow 0.4s, background 0.4s;
+}
+.io-node.healthy { border-color: rgba(34,197,94,0.4); }
+.io-node.warning {
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 10px rgba(245,158,11,0.1);
+}
+.io-node.critical {
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 14px rgba(239,68,68,0.15);
+}
+.io-node-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.io-node-label {
+  font-family: var(--head); font-weight: 700; font-size: 0.68rem;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.io-node-sublabel {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--text3);
+  margin-top: 2px;
+}
+.io-flow-connector {
+  display: flex; justify-content: center; padding: 4px 0;
+  position: relative; overflow: visible; height: 24px;
+}
+.io-flow-line {
+  width: 2px; height: 100%; background: var(--border); position: relative;
+}
+.io-flow-dot {
+  position: absolute; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); left: 50%; transform: translateX(-50%);
+  animation: ioFlowDown 2s linear infinite;
+}
+@keyframes ioFlowDown {
+  0% { top: -6px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: calc(100% + 6px); opacity: 0; }
+}
+.io-flow-dot:nth-child(2) { animation-delay: 0.7s; }
+.io-flow-dot:nth-child(3) { animation-delay: 1.4s; }
+
+/* Pod group inside InferencePool */
+.io-pool-container {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px; min-width: 280px;
+  transition: border-color 0.4s;
+}
+.io-pool-label {
+  font-family: var(--head); font-weight: 700; font-size: 0.7rem;
+  color: var(--accent); margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.io-pod-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.io-pod {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 6px; text-align: center;
+  font-family: var(--mono); font-size: 0.6rem; color: var(--text3);
+  transition: border-color 0.4s, color 0.4s;
+}
+.io-pod.healthy { border-color: rgba(34,197,94,0.3); color: var(--green); }
+.io-pod.warning { border-color: rgba(245,158,11,0.3); color: var(--amber); }
+.io-pod.critical { border-color: rgba(239,68,68,0.3); color: var(--red); }
+.io-pod-inner { font-size: 0.55rem; color: var(--text3); margin-top: 2px; }
+
+/* Network fabric bar */
+.io-fabric {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 20px;
+  text-align: center; width: 100%; position: relative; overflow: hidden;
+  transition: border-color 0.4s;
+}
+.io-fabric-dots {
+  position: absolute; top: 0; left: 0; width: 200%; height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    rgba(59,130,246,0.08) 20px,
+    rgba(59,130,246,0.08) 22px
+  );
+  animation: ioFabricScroll 3s linear infinite;
+}
+@keyframes ioFabricScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Diagram slider */
+.io-slider-wrap {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 16px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.io-slider-label {
+  font-size: 0.75rem; color: var(--text3); white-space: nowrap;
+}
+.io-slider-val {
+  font-family: var(--mono); font-size: 0.85rem; font-weight: 700;
+  color: var(--accent); min-width: 60px; text-align: right;
+}
+
+/* ============================================================
+   Feature 5: Post-mortem Template Generator
+   ============================================================ */
+.pm-form {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 16px;
+}
+@media (max-width: 600px) { .pm-form { grid-template-columns: 1fr; } }
+.pm-field { display: flex; flex-direction: column; gap: 4px; }
+.pm-field.full { grid-column: 1 / -1; }
+.pm-label {
+  font-size: 0.72rem; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.06em; font-family: var(--head); font-weight: 700;
+}
+.pm-select, .pm-input {
+  font-family: var(--body); font-size: 0.8rem;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 12px; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.pm-select:focus, .pm-input:focus { border-color: var(--accent); }
+.pm-select { cursor: pointer; }
+.pm-select option { background: var(--bg-panel); color: var(--text); }
+
+.pm-output {
+  display: none; background: var(--bg-panel);
+  border: 1px solid var(--border); border-radius: var(--r);
+  overflow: hidden;
+}
+.pm-output.show { display: block; }
+.pm-output-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+}
+.pm-output-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.78rem;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.pm-copy-btn {
+  font-family: var(--body); font-size: 0.72rem; font-weight: 700;
+  padding: 5px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--accent); background: transparent;
+  color: var(--accent); cursor: pointer; transition: all 0.2s;
+}
+.pm-copy-btn:hover { background: var(--accent-dim); }
+.pm-copy-btn.copied { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.pm-output-body {
+  padding: 16px; max-height: 500px; overflow-y: auto;
+}
+.pm-section {
+  margin-bottom: 16px;
+}
+.pm-section:last-child { margin-bottom: 0; }
+.pm-section-title {
+  font-family: var(--head); font-weight: 700; font-size: 0.78rem;
+  color: var(--accent); margin-bottom: 6px;
+}
+.pm-section-content {
+  font-size: 0.78rem; color: var(--text2); line-height: 1.7;
+  white-space: pre-wrap;
+}
+.pm-meta-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin-bottom: 16px;
+}
+@media (max-width: 700px) { .pm-meta-grid { grid-template-columns: repeat(2, 1fr); } }
+.pm-meta-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px;
+}
+.pm-meta-label {
+  font-size: 0.65rem; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 2px;
+}
+.pm-meta-val {
+  font-family: var(--mono); font-size: 0.82rem; font-weight: 700; color: var(--text);
+}
 </style>
 </head>
 <body>
@@ -503,6 +1023,150 @@ body {
 
     <!-- Right column: Metrics -->
     <div class="metrics" id="metricsPanel"></div>
+  </div>
+
+  <!-- ============================================================
+       Feature 1: Scale Simulator
+       ============================================================ -->
+  <div class="collapsible-section" id="scaleSimSection">
+    <button class="collapsible-toggle" id="scaleSimToggle">
+      <span class="toggle-left"><span class="section-icon">&#9881;</span> Scale Simulator</span>
+      <span class="collapsible-arrow" id="scaleSimArrow">&#9660;</span>
+    </button>
+    <div class="collapsible-body" id="scaleSimBody">
+      <div class="collapsible-content">
+        <div class="ss-controls">
+          <div class="ss-slider-wrap">
+            <label for="ssSlider">RPS</label>
+            <input type="range" class="ss-slider" id="ssSlider" min="1" max="10000" value="100" step="1">
+            <span class="ss-rps-display"><span id="ssRpsVal">100</span><span class="ss-rps-unit">RPS</span></span>
+          </div>
+        </div>
+        <div class="ss-infra" id="ssInfra"></div>
+        <div class="ss-failure-overlay" id="ssFailOverlay">
+          <div class="ss-failure-text">SYSTEM FAILURE</div>
+        </div>
+        <div class="ss-log" id="ssLog">
+          <div class="ss-log-title">Breaking Point Log</div>
+          <div id="ssLogEntries"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Feature 2: Breaking Point Catalog
+       ============================================================ -->
+  <div class="collapsible-section" id="bpSection">
+    <button class="collapsible-toggle" id="bpToggle">
+      <span class="toggle-left"><span class="section-icon">&#9888;</span> Breaking Point Catalog</span>
+      <span class="collapsible-arrow" id="bpArrow">&#9660;</span>
+    </button>
+    <div class="collapsible-body" id="bpBody">
+      <div class="collapsible-content">
+        <div class="bp-grid" id="bpGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Feature 3: Scaling Readiness Assessment
+       ============================================================ -->
+  <div class="collapsible-section" id="sraSection">
+    <button class="collapsible-toggle" id="sraToggle">
+      <span class="toggle-left"><span class="section-icon">&#9745;</span> Scaling Readiness Assessment</span>
+      <span class="collapsible-arrow" id="sraArrow">&#9660;</span>
+    </button>
+    <div class="collapsible-body" id="sraBody">
+      <div class="collapsible-content">
+        <div class="sra-container" id="sraContainer">
+          <div class="sra-progress-wrap">
+            <div class="sra-progress-bar"><div class="sra-progress-fill" id="sraProgressFill" style="width:0%"></div></div>
+            <div class="sra-progress-text" id="sraProgressText">0 / 15 questions</div>
+          </div>
+          <div id="sraQuestions"></div>
+          <div class="sra-nav" id="sraNav">
+            <button class="btn secondary" id="sraPrev" disabled>Previous</button>
+            <button class="btn primary" id="sraNext" disabled>Next</button>
+          </div>
+          <div class="sra-results" id="sraResults"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Feature 4: Infrastructure Overview Diagram
+       ============================================================ -->
+  <div class="collapsible-section" id="ioSection">
+    <button class="collapsible-toggle" id="ioToggle">
+      <span class="toggle-left"><span class="section-icon">&#9635;</span> Infrastructure Overview</span>
+      <span class="collapsible-arrow" id="ioArrow">&#9660;</span>
+    </button>
+    <div class="collapsible-body" id="ioBody">
+      <div class="collapsible-content">
+        <div class="io-diagram" id="ioDiagram"></div>
+        <div class="io-slider-wrap">
+          <span class="io-slider-label">Simulate Load:</span>
+          <input type="range" class="ss-slider" id="ioSlider" min="1" max="10000" value="100" step="1">
+          <span class="io-slider-val" id="ioSliderVal">100 RPS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Feature 5: Post-mortem Template Generator
+       ============================================================ -->
+  <div class="collapsible-section" id="pmSection">
+    <button class="collapsible-toggle" id="pmToggle">
+      <span class="toggle-left"><span class="section-icon">&#9998;</span> Post-mortem Template Generator</span>
+      <span class="collapsible-arrow" id="pmArrow">&#9660;</span>
+    </button>
+    <div class="collapsible-body" id="pmBody">
+      <div class="collapsible-content">
+        <div class="pm-form">
+          <div class="pm-field full">
+            <span class="pm-label">Failure Scenario</span>
+            <select class="pm-select" id="pmScenario">
+              <option value="">-- Select a failure type --</option>
+              <option value="oom">OOM (Out of Memory)</option>
+              <option value="queue">Queue Overflow</option>
+              <option value="cache">Cache Thrashing</option>
+              <option value="network">Network Saturation</option>
+              <option value="thermal">GPU Thermal Throttling</option>
+              <option value="etcd">etcd Write Limits</option>
+              <option value="herd">Thundering Herd</option>
+              <option value="stale">Stale Routing</option>
+            </select>
+          </div>
+          <div class="pm-field">
+            <span class="pm-label">Cluster Size (GPUs)</span>
+            <input type="number" class="pm-input" id="pmGpus" placeholder="e.g., 64" min="1" max="10000">
+          </div>
+          <div class="pm-field">
+            <span class="pm-label">Traffic Level (RPS)</span>
+            <input type="number" class="pm-input" id="pmRps" placeholder="e.g., 2500" min="1" max="100000">
+          </div>
+          <div class="pm-field">
+            <span class="pm-label">Time of Incident</span>
+            <input type="text" class="pm-input" id="pmTime" placeholder="e.g., 2025-06-25 03:42 UTC">
+          </div>
+          <div class="pm-field">
+            <span class="pm-label">Duration</span>
+            <input type="text" class="pm-input" id="pmDuration" placeholder="e.g., 47 minutes">
+          </div>
+        </div>
+        <button class="btn primary" id="pmGenerate">Generate Post-mortem</button>
+        <div class="pm-output" id="pmOutput">
+          <div class="pm-output-header">
+            <span class="pm-output-title">Generated Post-mortem</span>
+            <button class="pm-copy-btn" id="pmCopy">Copy to Clipboard</button>
+          </div>
+          <div class="pm-output-body" id="pmOutputBody"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -1750,6 +2414,1025 @@ body {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
   requestAnimationFrame(mainLoop);
+
+  /* ==========================================================
+     COLLAPSIBLE SECTIONS (shared helper)
+     ========================================================== */
+  function setupCollapsible(toggleId, bodyId, arrowId) {
+    var toggle = document.getElementById(toggleId);
+    var body = document.getElementById(bodyId);
+    var arrow = document.getElementById(arrowId);
+    if (!toggle || !body) return;
+    toggle.addEventListener('click', function () {
+      var open = body.classList.toggle('open');
+      if (arrow) arrow.style.transform = open ? 'rotate(180deg)' : '';
+    });
+  }
+  setupCollapsible('scaleSimToggle', 'scaleSimBody', 'scaleSimArrow');
+  setupCollapsible('bpToggle', 'bpBody', 'bpArrow');
+  setupCollapsible('sraToggle', 'sraBody', 'sraArrow');
+  setupCollapsible('ioToggle', 'ioBody', 'ioArrow');
+  setupCollapsible('pmToggle', 'pmBody', 'pmArrow');
+
+  /* ==========================================================
+     FEATURE 1: Scale Simulator
+     ========================================================== */
+  (function () {
+    var SS_COMPONENTS = [
+      { id: 'lb',       name: 'Load Balancer' },
+      { id: 'router',   name: 'Router / EPP' },
+      { id: 'podpool',  name: 'Pod Pool' },
+      { id: 'kvcache',  name: 'KV Cache' },
+      { id: 'gpumem',   name: 'GPU Memory' },
+      { id: 'netfab',   name: 'Network Fabric' },
+      { id: 'storage',  name: 'Storage' },
+      { id: 'ctlplane', name: 'Control Plane / etcd' },
+    ];
+
+    // Thresholds: [rps, status] per component.  status: 'healthy' | 'warning' | 'critical'
+    var THRESHOLDS = {
+      lb:       [{ rps: 7000, s: 'warning' }, { rps: 9000, s: 'critical' }],
+      router:   [{ rps: 500,  s: 'warning' }, { rps: 1000, s: 'critical' }],
+      podpool:  [{ rps: 2500, s: 'warning' }, { rps: 5000, s: 'critical' }],
+      kvcache:  [{ rps: 1000, s: 'warning' }, { rps: 2500, s: 'critical' }],
+      gpumem:   [{ rps: 2500, s: 'warning' }, { rps: 5000, s: 'critical' }],
+      netfab:   [{ rps: 2500, s: 'warning' }, { rps: 5000, s: 'critical' }],
+      storage:  [{ rps: 3000, s: 'warning' }, { rps: 5000, s: 'critical' }],
+      ctlplane: [{ rps: 5000, s: 'warning' }, { rps: 8000, s: 'critical' }],
+    };
+
+    function getStatus(compId, rps) {
+      var th = THRESHOLDS[compId];
+      for (var i = th.length - 1; i >= 0; i--) {
+        if (rps >= th[i].rps) return th[i].s;
+      }
+      return 'healthy';
+    }
+
+    function getCapacity(compId, rps) {
+      var th = THRESHOLDS[compId];
+      var maxRps = th[th.length - 1].rps * 1.2;
+      return Math.min(100, Math.round((rps / maxRps) * 100));
+    }
+
+    function capacityColor(pct) {
+      if (pct > 80) return 'var(--red)';
+      if (pct > 55) return 'var(--amber)';
+      return 'var(--green)';
+    }
+
+    // Build component cards
+    var infraEl = document.getElementById('ssInfra');
+    SS_COMPONENTS.forEach(function (comp) {
+      var div = document.createElement('div');
+      div.className = 'ss-component healthy';
+      div.id = 'ss-' + comp.id;
+      div.innerHTML =
+        '<div class="ss-comp-header">' +
+          '<span class="ss-comp-name">' + comp.name + '</span>' +
+          '<span class="ss-health-dot green" id="ss-dot-' + comp.id + '"></span>' +
+        '</div>' +
+        '<div class="ss-capacity-bar"><div class="ss-capacity-fill" id="ss-fill-' + comp.id + '" style="width:10%;background:var(--green)"></div></div>' +
+        '<div class="ss-capacity-pct" id="ss-pct-' + comp.id + '">10%</div>';
+      infraEl.appendChild(div);
+    });
+
+    var slider = document.getElementById('ssSlider');
+    var rpsVal = document.getElementById('ssRpsVal');
+    var failOverlay = document.getElementById('ssFailOverlay');
+    var logEntries = document.getElementById('ssLogEntries');
+
+    function updateScaleSim() {
+      var rps = parseInt(slider.value, 10);
+      rpsVal.textContent = rps.toLocaleString();
+
+      var logItems = [];
+
+      SS_COMPONENTS.forEach(function (comp) {
+        var status = getStatus(comp.id, rps);
+        var capacity = getCapacity(comp.id, rps);
+        var compEl = document.getElementById('ss-' + comp.id);
+        var dotEl = document.getElementById('ss-dot-' + comp.id);
+        var fillEl = document.getElementById('ss-fill-' + comp.id);
+        var pctEl = document.getElementById('ss-pct-' + comp.id);
+
+        compEl.className = 'ss-component ' + status;
+        dotEl.className = 'ss-health-dot ' + (status === 'healthy' ? 'green' : status === 'warning' ? 'amber' : 'red');
+        fillEl.style.width = capacity + '%';
+        fillEl.style.background = capacityColor(capacity);
+        pctEl.textContent = capacity + '%';
+
+        if (status !== 'healthy') {
+          var th = THRESHOLDS[comp.id];
+          for (var i = 0; i < th.length; i++) {
+            if (rps >= th[i].rps) {
+              logItems.push({
+                name: comp.name,
+                rps: th[i].rps,
+                status: th[i].s
+              });
+            }
+          }
+        }
+      });
+
+      // Sort log by RPS threshold
+      logItems.sort(function (a, b) { return a.rps - b.rps; });
+
+      // Update breaking point log
+      logEntries.innerHTML = '';
+      if (logItems.length === 0) {
+        logEntries.innerHTML = '<div style="font-size:0.72rem;color:var(--text3);padding:4px 0;">All components nominal.</div>';
+      } else {
+        logItems.forEach(function (item) {
+          var entry = document.createElement('div');
+          entry.className = 'ss-log-entry';
+          entry.innerHTML =
+            '<span class="ss-log-comp">' + item.name + '</span>' +
+            '<span class="ss-log-rps">' + item.rps.toLocaleString() + ' RPS</span>' +
+            '<span class="ss-log-status ' + (item.status === 'critical' ? 'red' : 'amber') + '">' +
+              (item.status === 'critical' ? 'CRITICAL' : 'WARNING') +
+            '</span>';
+          logEntries.appendChild(entry);
+        });
+      }
+
+      // System failure overlay
+      if (rps >= 10000) {
+        failOverlay.classList.add('show');
+      } else {
+        failOverlay.classList.remove('show');
+      }
+    }
+
+    slider.addEventListener('input', updateScaleSim);
+    updateScaleSim();
+  })();
+
+  /* ==========================================================
+     FEATURE 2: Breaking Point Catalog
+     ========================================================== */
+  (function () {
+    var CATALOG = [
+      {
+        id: 'oom', title: 'OOM (Out of Memory)', icon: '\u{1F4BE}', severity: 'Critical',
+        symptoms: [
+          'Pods killed with OOMKilled exit code',
+          'Sudden loss of in-flight requests',
+          'Container restarts spike in metrics',
+          'dmesg shows oom-killer invocations',
+        ],
+        rootCauses: [
+          'KV cache grows unbounded with long context prompts',
+          'Batch size not capped, allowing too many concurrent sequences',
+          'Memory fragmentation from repeated model loading/unloading',
+          'Host memory overcommit with no swap configured',
+        ],
+        immediateFix: 'Reduce max_num_seqs and max_model_len in vLLM config. Kill pods exceeding 90% memory usage. Temporarily reject new requests via load shedding.',
+        longTermFix: 'Deploy llm-d InferencePool with memory-aware scheduling. EPP routes requests based on current memory pressure per pod, preventing overcommit. Configure prefix caching to share KV memory across similar prompts.',
+        metrics: ['container_memory_working_set_bytes', 'kv_cache_usage_percent', 'vllm_num_running_sequences', 'oom_kill_count'],
+      },
+      {
+        id: 'queue', title: 'Queue Overflow', icon: '\u{1F4E5}', severity: 'High',
+        symptoms: [
+          'Request latency spikes to 10x+ normal',
+          'HTTP 429 / 503 responses increase sharply',
+          'Queue depth metrics show exponential growth',
+          'Client-side timeout errors cascade',
+        ],
+        rootCauses: [
+          'Sudden traffic spike exceeds cluster serving capacity',
+          'Slow inference caused by model loading or cache miss',
+          'Uneven routing sends too many requests to few pods',
+          'No backpressure mechanism configured',
+        ],
+        immediateFix: 'Enable rate limiting at the gateway layer. Increase replica count if GPU capacity allows. Implement request shedding for lowest-priority traffic.',
+        longTermFix: 'llm-d EPP provides load-aware routing that distributes queue depth evenly across pods. InferencePool autoscaler responds to queue depth signals, scaling pods before overflow occurs.',
+        metrics: ['scheduler_queue_depth', 'request_latency_p99', 'http_429_rate', 'dropped_requests_total'],
+      },
+      {
+        id: 'cache', title: 'Cache Thrashing', icon: '\u{1F504}', severity: 'Critical',
+        symptoms: [
+          'KV cache hit rate drops below 15%',
+          'TTFT latency increases 5-10x (redundant prefill)',
+          'GPU utilization spikes to 100% with low throughput',
+          'Identical prefix recomputation across multiple pods',
+        ],
+        rootCauses: [
+          'Random routing ignores prefix locality',
+          'Too many unique prompts for available cache capacity',
+          'Cache eviction policy evicts hot entries prematurely',
+          'Model updates invalidate cached prefixes',
+        ],
+        immediateFix: 'Reduce the number of active models or prompt templates. Increase per-pod KV cache allocation. Temporarily pin frequent prompts to specific pods.',
+        longTermFix: 'llm-d prefix-aware scheduling routes requests to pods that already have the matching prefix cached. Cache hit rates recover to 85%+, eliminating redundant prefill and reducing TTFT by 10x.',
+        metrics: ['kv_cache_hit_rate', 'prefill_tokens_per_second', 'ttft_latency_ms', 'redundant_prefill_count'],
+      },
+      {
+        id: 'network', title: 'Network Saturation', icon: '\u{1F310}', severity: 'High',
+        symptoms: [
+          'NCCL timeout errors in GPU communication',
+          'Increased packet loss between nodes',
+          'Bandwidth metrics plateau at interface limit',
+          'Latency variance increases significantly',
+        ],
+        rootCauses: [
+          'Tensor parallelism requires high east-west bandwidth',
+          'KV cache transfer between pods saturates links',
+          'Model weight distribution during scaling events',
+          'Background checkpoint/logging traffic competes with inference',
+        ],
+        immediateFix: 'Reduce tensor parallel degree. Enable traffic shaping to prioritize inference over background tasks. Temporarily disable non-critical telemetry.',
+        longTermFix: 'llm-d EPP minimizes cross-node data transfer by routing requests to pods with local data affinity. Topology-aware scheduling places related pods on the same rack or switch.',
+        metrics: ['node_network_transmit_bytes_total', 'nccl_all_reduce_latency_ms', 'packet_loss_rate', 'network_bandwidth_utilization'],
+      },
+      {
+        id: 'thermal', title: 'GPU Thermal Throttling', icon: '\u{1F321}', severity: 'Medium',
+        symptoms: [
+          'GPU clock speed drops below base frequency',
+          'Throughput degrades gradually over hours',
+          'nvidia-smi shows temperature above throttle threshold',
+          'Power draw decreases despite high utilization',
+        ],
+        rootCauses: [
+          'Sustained 100% GPU utilization without cooling headroom',
+          'Datacenter cooling capacity insufficient for GPU density',
+          'Airflow obstruction in high-density rack configurations',
+          'Fan failure or degraded thermal paste',
+        ],
+        immediateFix: 'Reduce batch sizes to lower GPU utilization. Increase cooling system output. Migrate workloads off affected GPUs temporarily.',
+        longTermFix: 'llm-d thermal-aware scheduling avoids routing to hot GPUs. InferencePool health checks include temperature metrics, automatically draining pods before throttling occurs.',
+        metrics: ['gpu_temperature_celsius', 'gpu_clock_speed_mhz', 'gpu_power_draw_watts', 'gpu_throttle_reason'],
+      },
+      {
+        id: 'etcd', title: 'etcd Write Limits', icon: '\u{1F5C4}', severity: 'Critical',
+        symptoms: [
+          'API server returns 429 Too Many Requests',
+          'etcd compaction takes seconds instead of milliseconds',
+          'Watch events lag behind actual cluster state',
+          'Pod scheduling delays increase to minutes',
+        ],
+        rootCauses: [
+          'Pod status updates from large fleet exceed write throughput',
+          'Frequent ConfigMap/Secret updates from rolling deployments',
+          'Excessive watch connections from monitoring agents',
+          'etcd database size approaching limit (default 2GB)',
+        ],
+        immediateFix: 'Increase etcd disk IOPS. Reduce health check frequency temporarily. Compact etcd history manually. Defragment etcd members.',
+        longTermFix: 'llm-d InferencePool CRD batches endpoint management, reducing per-pod etcd writes by 10x. Control plane pressure stays manageable even at 100+ GPU clusters.',
+        metrics: ['etcd_mvcc_db_total_size_bytes', 'etcd_disk_wal_fsync_duration_seconds', 'apiserver_request_total{code="429"}', 'etcd_server_leader_changes_seen_total'],
+      },
+      {
+        id: 'herd', title: 'Thundering Herd', icon: '\u{26A1}', severity: 'Critical',
+        symptoms: [
+          'Dozens of pods enter CrashLoopBackOff simultaneously',
+          'Storage IOPS spike to maximum',
+          'Model loading timeouts cascade across cluster',
+          'Serving capacity drops to near zero during recovery',
+        ],
+        rootCauses: [
+          'Rolling restart triggers simultaneous model loading',
+          'Autoscaler adds many pods at once during traffic spike',
+          'Shared model storage becomes I/O bottleneck',
+          'No staggered startup or readiness gates configured',
+        ],
+        immediateFix: 'Manually limit concurrent pod restarts. Pre-stage model weights on local NVMe. Implement circuit breaker at gateway to shed load during recovery.',
+        longTermFix: 'llm-d model management provides staged rollout with health-gate sequencing. Pods load models in controlled waves, and traffic only shifts after health checks pass.',
+        metrics: ['pods_crashloopbackoff_count', 'storage_iops', 'model_load_duration_seconds', 'ready_replicas_vs_desired'],
+      },
+      {
+        id: 'stale', title: 'Stale Routing', icon: '\u{1F517}', severity: 'High',
+        symptoms: [
+          'Requests routed to pods that no longer serve the expected model',
+          'Increased error rate with "model not found" responses',
+          'Endpoint list shows pods that have been terminated',
+          'Traffic sent to unhealthy pods for extended periods',
+        ],
+        rootCauses: [
+          'Service endpoint updates lag behind pod lifecycle',
+          'DNS TTL prevents quick discovery of pod changes',
+          'Health check intervals too long to detect failures promptly',
+          'Model swap on pod not reflected in routing metadata',
+        ],
+        immediateFix: 'Force endpoint sync by restarting kube-proxy. Reduce health check interval. Manually remove stale endpoints from service.',
+        longTermFix: 'llm-d EPP maintains real-time pod health and model state through direct gRPC health streams. Routing decisions use sub-second freshness, eliminating stale endpoint issues entirely.',
+        metrics: ['endpoint_update_lag_seconds', 'stale_endpoint_count', 'model_mismatch_errors', 'health_check_latency_ms'],
+      },
+    ];
+
+    var gridEl = document.getElementById('bpGrid');
+
+    CATALOG.forEach(function (item) {
+      var sevClass = item.severity === 'Critical' ? 'critical' : item.severity === 'High' ? 'high' : 'medium';
+      var card = document.createElement('div');
+      card.className = 'bp-card';
+      card.innerHTML =
+        '<div class="bp-card-header">' +
+          '<div class="bp-card-top">' +
+            '<div class="bp-title-wrap">' +
+              '<span class="bp-icon">' + item.icon + '</span>' +
+              '<span class="bp-title">' + item.title + '</span>' +
+            '</div>' +
+            '<span class="bp-severity ' + sevClass + '">' + item.severity + '</span>' +
+          '</div>' +
+          '<div class="bp-expand-hint">Click to expand details</div>' +
+        '</div>' +
+        '<div class="bp-details">' +
+          '<div class="bp-details-inner">' +
+            '<div class="bp-section-label">Symptoms</div>' +
+            '<ul>' + item.symptoms.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' +
+            '<div class="bp-section-label">Root Causes</div>' +
+            '<ul>' + item.rootCauses.map(function (r) { return '<li>' + r + '</li>'; }).join('') + '</ul>' +
+            '<div class="bp-section-label">Immediate Fix</div>' +
+            '<p>' + item.immediateFix + '</p>' +
+            '<div class="bp-section-label">Long-term Fix with llm-d</div>' +
+            '<p>' + item.longTermFix + '</p>' +
+            '<div class="bp-section-label">Metrics to Monitor</div>' +
+            '<div class="bp-metrics-list">' + item.metrics.map(function (m) { return '<code>' + m + '</code>'; }).join('') + '</div>' +
+          '</div>' +
+        '</div>';
+
+      card.addEventListener('click', function () {
+        var wasExpanded = card.classList.contains('expanded');
+        // Close all
+        gridEl.querySelectorAll('.bp-card').forEach(function (c) { c.classList.remove('expanded'); });
+        if (!wasExpanded) card.classList.add('expanded');
+      });
+
+      gridEl.appendChild(card);
+    });
+  })();
+
+  /* ==========================================================
+     FEATURE 3: Scaling Readiness Assessment
+     ========================================================== */
+  (function () {
+    var QUESTIONS = [
+      {
+        area: 'Routing Strategy',
+        q: 'How does your cluster route inference requests to pods?',
+        opts: [
+          { text: 'Round-robin through a basic Kubernetes Service', pts: 0 },
+          { text: 'Weighted routing based on pod labels or zones', pts: 1 },
+          { text: 'Load-aware routing considering queue depth and utilization', pts: 2 },
+          { text: 'Prefix-aware routing with KV cache locality (e.g., llm-d EPP)', pts: 3 },
+        ],
+      },
+      {
+        area: 'Monitoring Coverage',
+        q: 'What level of observability do you have for your inference fleet?',
+        opts: [
+          { text: 'Basic pod CPU/memory metrics only', pts: 0 },
+          { text: 'GPU utilization and request latency dashboards', pts: 1 },
+          { text: 'Full stack: GPU, KV cache, queue depth, and error rate with alerts', pts: 2 },
+          { text: 'Real-time per-pod inference metrics with anomaly detection and automated response', pts: 3 },
+        ],
+      },
+      {
+        area: 'Cache Management',
+        q: 'How do you manage KV cache across your inference pods?',
+        opts: [
+          { text: 'Default vLLM settings, no special management', pts: 0 },
+          { text: 'Tuned cache sizes and eviction policies per model', pts: 1 },
+          { text: 'Monitoring cache hit rates and manually adjusting routing', pts: 2 },
+          { text: 'Automated prefix-aware routing that maximizes cache reuse', pts: 3 },
+        ],
+      },
+      {
+        area: 'Network Topology',
+        q: 'How is your GPU cluster network architected?',
+        opts: [
+          { text: 'Standard datacenter networking, no GPU-specific optimizations', pts: 0 },
+          { text: 'GPUs on same rack with dedicated switching', pts: 1 },
+          { text: 'InfiniBand or RoCE for GPU-to-GPU with traffic prioritization', pts: 2 },
+          { text: 'Topology-aware scheduling with bandwidth-optimized GPU placement', pts: 3 },
+        ],
+      },
+      {
+        area: 'Autoscaler Config',
+        q: 'How does your inference fleet handle scaling events?',
+        opts: [
+          { text: 'Manual scaling only', pts: 0 },
+          { text: 'HPA based on CPU/memory with default settings', pts: 1 },
+          { text: 'Custom HPA using inference-specific metrics (queue depth, latency)', pts: 2 },
+          { text: 'Predictive autoscaling with staged rollout and health gates', pts: 3 },
+        ],
+      },
+      {
+        area: 'Model Loading Strategy',
+        q: 'How do new pods load model weights at startup?',
+        opts: [
+          { text: 'Download from remote storage (S3/GCS) on every pod start', pts: 0 },
+          { text: 'Pre-pulled container images with baked-in weights', pts: 1 },
+          { text: 'Shared persistent volume with local caching', pts: 2 },
+          { text: 'Staged model loading with staggered rollout and readiness gates', pts: 3 },
+        ],
+      },
+      {
+        area: 'Control Plane Sizing',
+        q: 'How is your Kubernetes control plane sized relative to your GPU fleet?',
+        opts: [
+          { text: 'Default managed Kubernetes (e.g., EKS/GKE default tier)', pts: 0 },
+          { text: 'Upgraded control plane with dedicated etcd storage', pts: 1 },
+          { text: 'Right-sized for pod count with etcd performance monitoring', pts: 2 },
+          { text: 'Batched endpoint management (e.g., InferencePool CRD) to minimize API server load', pts: 3 },
+        ],
+      },
+      {
+        area: 'Chaos Testing',
+        q: 'How often do you test failure scenarios in your inference cluster?',
+        opts: [
+          { text: 'Never tested failure scenarios', pts: 0 },
+          { text: 'Occasional manual failure testing before major deployments', pts: 1 },
+          { text: 'Regular chaos engineering experiments (monthly)', pts: 2 },
+          { text: 'Continuous automated chaos testing with gameday exercises', pts: 3 },
+        ],
+      },
+      {
+        area: 'Incident Runbooks',
+        q: 'What documentation exists for inference cluster incidents?',
+        opts: [
+          { text: 'No documented runbooks', pts: 0 },
+          { text: 'Basic troubleshooting notes in a wiki', pts: 1 },
+          { text: 'Detailed runbooks for common failure modes with escalation paths', pts: 2 },
+          { text: 'Automated runbooks integrated with alerting, with regular drills', pts: 3 },
+        ],
+      },
+      {
+        area: 'SLO Definitions',
+        q: 'Do you have defined SLOs for your inference service?',
+        opts: [
+          { text: 'No defined SLOs', pts: 0 },
+          { text: 'Informal targets discussed but not measured', pts: 1 },
+          { text: 'Defined SLOs for latency and availability with dashboards', pts: 2 },
+          { text: 'Error budgets tracked, SLO-based alerting, and automated remediation', pts: 3 },
+        ],
+      },
+      {
+        area: 'Capacity Planning',
+        q: 'How do you plan GPU capacity for your inference workload?',
+        opts: [
+          { text: 'Reactive: add GPUs when users complain', pts: 0 },
+          { text: 'Periodic reviews based on average utilization', pts: 1 },
+          { text: 'Forecasting based on traffic trends and model requirements', pts: 2 },
+          { text: 'Automated capacity modeling with headroom buffers and procurement lead time', pts: 3 },
+        ],
+      },
+      {
+        area: 'Graceful Degradation',
+        q: 'What happens to your service when demand exceeds capacity?',
+        opts: [
+          { text: 'Requests queue indefinitely or time out unpredictably', pts: 0 },
+          { text: 'Basic rate limiting returns 429 errors', pts: 1 },
+          { text: 'Priority-based request shedding with user-facing degradation notices', pts: 2 },
+          { text: 'Intelligent load shedding with fallback models and priority queues', pts: 3 },
+        ],
+      },
+      {
+        area: 'Rollback Procedures',
+        q: 'How do you handle a bad model deployment?',
+        opts: [
+          { text: 'Manual rollback by redeploying the previous version', pts: 0 },
+          { text: 'Scripted rollback with some manual verification steps', pts: 1 },
+          { text: 'Canary deployments with automated rollback on error rate spike', pts: 2 },
+          { text: 'Blue-green deployments with instant traffic switch and automated validation', pts: 3 },
+        ],
+      },
+      {
+        area: 'Load Testing',
+        q: 'How frequently do you load test your inference cluster at production-like scale?',
+        opts: [
+          { text: 'Never done load testing', pts: 0 },
+          { text: 'Once before initial launch', pts: 1 },
+          { text: 'Before each major change (model update, infra change)', pts: 2 },
+          { text: 'Continuous load testing in staging that mirrors production traffic patterns', pts: 3 },
+        ],
+      },
+      {
+        area: 'Team On-Call',
+        q: 'How is your on-call practice structured for the inference platform?',
+        opts: [
+          { text: 'No formal on-call; the person who built it gets called', pts: 0 },
+          { text: 'Shared on-call rotation but limited to business hours', pts: 1 },
+          { text: '24/7 on-call with defined escalation and handoff procedures', pts: 2 },
+          { text: '24/7 on-call with automated first-response, post-incident reviews, and continuous improvement', pts: 3 },
+        ],
+      },
+    ];
+
+    var currentQ = 0;
+    var answers = new Array(QUESTIONS.length).fill(-1); // -1 = unanswered
+    var questionsEl = document.getElementById('sraQuestions');
+    var progressFill = document.getElementById('sraProgressFill');
+    var progressText = document.getElementById('sraProgressText');
+    var prevBtn = document.getElementById('sraPrev');
+    var nextBtn = document.getElementById('sraNext');
+    var resultsEl = document.getElementById('sraResults');
+    var navEl = document.getElementById('sraNav');
+
+    function renderQuestion() {
+      var q = QUESTIONS[currentQ];
+      questionsEl.innerHTML = '';
+      var card = document.createElement('div');
+      card.className = 'sra-question-card';
+      card.innerHTML = '<div class="sra-q-number">Question ' + (currentQ + 1) + ' of ' + QUESTIONS.length + ' -- ' + q.area + '</div>' +
+        '<div class="sra-q-text">' + q.q + '</div>' +
+        '<div class="sra-options" id="sraOpts"></div>';
+      questionsEl.appendChild(card);
+
+      var optsEl = document.getElementById('sraOpts');
+      q.opts.forEach(function (opt, i) {
+        var optDiv = document.createElement('div');
+        optDiv.className = 'sra-option' + (answers[currentQ] === i ? ' selected' : '');
+        optDiv.innerHTML = '<span class="sra-option-radio"></span><span>' + opt.text + '</span>';
+        optDiv.addEventListener('click', function () {
+          answers[currentQ] = i;
+          renderQuestion();
+          updateProgress();
+          updateNav();
+        });
+        optsEl.appendChild(optDiv);
+      });
+
+      updateNav();
+    }
+
+    function updateProgress() {
+      var answered = answers.filter(function (a) { return a >= 0; }).length;
+      var pct = Math.round((answered / QUESTIONS.length) * 100);
+      progressFill.style.width = pct + '%';
+      progressText.textContent = answered + ' / ' + QUESTIONS.length + ' questions';
+    }
+
+    function updateNav() {
+      prevBtn.disabled = currentQ === 0;
+      var allAnswered = answers.every(function (a) { return a >= 0; });
+      var isLast = currentQ === QUESTIONS.length - 1;
+      if (isLast && allAnswered) {
+        nextBtn.textContent = 'See Results';
+        nextBtn.disabled = false;
+      } else if (isLast) {
+        nextBtn.textContent = 'See Results';
+        nextBtn.disabled = true;
+      } else {
+        nextBtn.textContent = 'Next';
+        nextBtn.disabled = answers[currentQ] < 0;
+      }
+    }
+
+    prevBtn.addEventListener('click', function () {
+      if (currentQ > 0) { currentQ--; renderQuestion(); }
+    });
+
+    nextBtn.addEventListener('click', function () {
+      if (currentQ < QUESTIONS.length - 1) {
+        currentQ++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      questionsEl.style.display = 'none';
+      navEl.style.display = 'none';
+
+      var totalScore = 0;
+      var areaScores = [];
+      QUESTIONS.forEach(function (q, i) {
+        var pts = q.opts[answers[i]].pts;
+        totalScore += pts;
+        areaScores.push({ area: q.area, score: pts, max: 3 });
+      });
+
+      var rating, ratingColor;
+      if (totalScore <= 15) { rating = 'Not Ready -- High Risk'; ratingColor = 'var(--red)'; }
+      else if (totalScore <= 25) { rating = 'Partially Ready -- Significant Gaps'; ratingColor = 'var(--amber)'; }
+      else if (totalScore <= 35) { rating = 'Mostly Ready -- Some Improvements Needed'; ratingColor = 'var(--accent)'; }
+      else { rating = 'Production Ready'; ratingColor = 'var(--green)'; }
+
+      var html = '<div class="sra-score-display">' +
+        '<div class="sra-score-number" style="color:' + ratingColor + '">' + totalScore + '<span class="sra-score-max"> / 45</span></div>' +
+        '<div class="sra-score-rating" style="color:' + ratingColor + '">' + rating + '</div>' +
+        '</div>';
+
+      html += '<div class="sra-breakdown"><div class="sra-breakdown-title">Area Breakdown</div>';
+      areaScores.forEach(function (as) {
+        var cls = as.score >= 3 ? 'good' : as.score >= 2 ? 'ok' : as.score >= 1 ? 'warn' : 'bad';
+        html += '<div class="sra-breakdown-row">' +
+          '<span class="sra-breakdown-area">' + as.area + '</span>' +
+          '<span class="sra-breakdown-score ' + cls + '">' + as.score + ' / ' + as.max + '</span>' +
+          '</div>';
+      });
+      html += '</div>';
+
+      html += '<div style="margin-top:16px"><button class="btn primary" id="sraRetake">Retake Assessment</button></div>';
+
+      resultsEl.innerHTML = html;
+      resultsEl.classList.add('show');
+
+      document.getElementById('sraRetake').addEventListener('click', function () {
+        answers = new Array(QUESTIONS.length).fill(-1);
+        currentQ = 0;
+        questionsEl.style.display = '';
+        navEl.style.display = '';
+        resultsEl.classList.remove('show');
+        resultsEl.innerHTML = '';
+        renderQuestion();
+        updateProgress();
+      });
+    }
+
+    renderQuestion();
+    updateProgress();
+  })();
+
+  /* ==========================================================
+     FEATURE 4: Infrastructure Overview Diagram
+     ========================================================== */
+  (function () {
+    var diagram = document.getElementById('ioDiagram');
+    var ioSlider = document.getElementById('ioSlider');
+    var ioSliderVal = document.getElementById('ioSliderVal');
+
+    // Build the diagram layers
+    var layers = [
+      { id: 'io-users',    label: 'User Requests',   icon: '\u{1F464}', sublabel: 'HTTP/gRPC' },
+    ];
+
+    function makeConnector() {
+      return '<div class="io-flow-connector"><div class="io-flow-line"><div class="io-flow-dot"></div><div class="io-flow-dot"></div><div class="io-flow-dot"></div></div></div>';
+    }
+
+    var html = '';
+
+    // Layer 1: User Requests
+    html += '<div class="io-layer"><div class="io-node healthy" id="io-n-users"><div class="io-node-icon">\u{1F464}</div><div class="io-node-label">User Requests</div><div class="io-node-sublabel">HTTP / gRPC</div></div></div>';
+    html += makeConnector();
+
+    // Layer 2: Gateway API
+    html += '<div class="io-layer"><div class="io-node healthy" id="io-n-gateway"><div class="io-node-icon">\u{1F6E1}</div><div class="io-node-label">Gateway API</div><div class="io-node-sublabel">TLS termination, auth</div></div></div>';
+    html += makeConnector();
+
+    // Layer 3: EPP
+    html += '<div class="io-layer"><div class="io-node healthy" id="io-n-epp"><div class="io-node-icon">\u{1F9ED}</div><div class="io-node-label">EPP (Endpoint Picker)</div><div class="io-node-sublabel">Prefix-aware routing</div></div></div>';
+    html += makeConnector();
+
+    // Layer 4: InferencePool with pods
+    html += '<div class="io-layer">';
+    html += '<div class="io-pool-container" id="io-n-pool">';
+    html += '<div class="io-pool-label">InferencePool</div>';
+    html += '<div class="io-pod-grid">';
+    for (var p = 0; p < 8; p++) {
+      html += '<div class="io-pod healthy" id="io-pod-' + p + '">Pod ' + p + '<div class="io-pod-inner">GPU + KV$ + Model</div></div>';
+    }
+    html += '</div></div></div>';
+    html += makeConnector();
+
+    // Layer 5: Network Fabric (full-width)
+    html += '<div class="io-layer"><div class="io-fabric" id="io-n-fabric"><div class="io-fabric-dots"></div><div class="io-node-label" style="position:relative;z-index:1">Network Fabric</div><div class="io-node-sublabel" style="position:relative;z-index:1">InfiniBand / RoCE</div></div></div>';
+    html += makeConnector();
+
+    // Layer 6: Storage + Control Plane
+    html += '<div class="io-layer">';
+    html += '<div class="io-node healthy" id="io-n-storage"><div class="io-node-icon">\u{1F4BF}</div><div class="io-node-label">Shared Storage</div><div class="io-node-sublabel">Model weights</div></div>';
+    html += '<div class="io-node healthy" id="io-n-ctlplane"><div class="io-node-icon">\u{2699}</div><div class="io-node-label">Control Plane</div><div class="io-node-sublabel">etcd + API server</div></div>';
+    html += '</div>';
+
+    diagram.innerHTML = html;
+
+    // IO status thresholds (similar structure to scale sim)
+    var IO_THRESHOLDS = {
+      'io-n-users':    [{ rps: 8000, s: 'warning' }, { rps: 9500, s: 'critical' }],
+      'io-n-gateway':  [{ rps: 5000, s: 'warning' }, { rps: 8000, s: 'critical' }],
+      'io-n-epp':      [{ rps: 2000, s: 'warning' }, { rps: 5000, s: 'critical' }],
+      'io-n-pool':     [{ rps: 1500, s: 'warning' }, { rps: 4000, s: 'critical' }],
+      'io-n-fabric':   [{ rps: 3000, s: 'warning' }, { rps: 6000, s: 'critical' }],
+      'io-n-storage':  [{ rps: 2000, s: 'warning' }, { rps: 4500, s: 'critical' }],
+      'io-n-ctlplane': [{ rps: 4000, s: 'warning' }, { rps: 7000, s: 'critical' }],
+    };
+
+    function getIOStatus(nodeId, rps) {
+      var th = IO_THRESHOLDS[nodeId];
+      if (!th) return 'healthy';
+      for (var i = th.length - 1; i >= 0; i--) {
+        if (rps >= th[i].rps) return th[i].s;
+      }
+      return 'healthy';
+    }
+
+    function updateIODiagram() {
+      var rps = parseInt(ioSlider.value, 10);
+      ioSliderVal.textContent = rps.toLocaleString() + ' RPS';
+
+      // Update main nodes
+      Object.keys(IO_THRESHOLDS).forEach(function (nodeId) {
+        var el = document.getElementById(nodeId);
+        if (!el) return;
+        var status = getIOStatus(nodeId, rps);
+        el.classList.remove('healthy', 'warning', 'critical');
+        el.classList.add(status);
+      });
+
+      // Update pods
+      var podStatuses = ['healthy', 'healthy', 'healthy', 'healthy', 'healthy', 'healthy', 'healthy', 'healthy'];
+      if (rps >= 2000) {
+        podStatuses[6] = 'warning'; podStatuses[7] = 'warning';
+      }
+      if (rps >= 3500) {
+        podStatuses[4] = 'warning'; podStatuses[5] = 'warning';
+        podStatuses[6] = 'critical'; podStatuses[7] = 'critical';
+      }
+      if (rps >= 5500) {
+        podStatuses[0] = 'warning'; podStatuses[1] = 'warning';
+        podStatuses[2] = 'critical'; podStatuses[3] = 'critical';
+        podStatuses[4] = 'critical'; podStatuses[5] = 'critical';
+      }
+      if (rps >= 8000) {
+        for (var i = 0; i < 8; i++) podStatuses[i] = 'critical';
+      }
+      for (var j = 0; j < 8; j++) {
+        var podEl = document.getElementById('io-pod-' + j);
+        if (podEl) {
+          podEl.classList.remove('healthy', 'warning', 'critical');
+          podEl.classList.add(podStatuses[j]);
+        }
+      }
+    }
+
+    ioSlider.addEventListener('input', updateIODiagram);
+    updateIODiagram();
+  })();
+
+  /* ==========================================================
+     FEATURE 5: Post-mortem Template Generator
+     ========================================================== */
+  (function () {
+    var PM_SCENARIOS = {
+      oom: {
+        title: 'OOM (Out of Memory) Incident',
+        severity: 'SEV-1',
+        summary: function (g, r) { return 'At ' + r + ' RPS across ' + g + ' GPUs, multiple inference pods were terminated by the OOM killer. The KV cache consumed all available GPU and host memory, leading to cascading pod restarts and a complete loss of serving capacity for the affected model replicas.'; },
+        timeline: function (t) {
+          return t + ' - First OOM kill detected on pod vllm-worker-12\n' +
+            offset(t, 2) + ' - Monitoring alert fires: "Pod restart rate > 5/min"\n' +
+            offset(t, 5) + ' - 8 additional pods OOM killed within 3 minutes\n' +
+            offset(t, 8) + ' - On-call engineer paged, begins investigation\n' +
+            offset(t, 12) + ' - Root cause identified: KV cache unbounded growth\n' +
+            offset(t, 18) + ' - max_num_seqs reduced from 256 to 64 per pod\n' +
+            offset(t, 22) + ' - Pods stabilize, serving capacity restored\n' +
+            offset(t, 30) + ' - All replicas healthy, monitoring confirms stability';
+        },
+        rootCause: 'The vLLM configuration allowed up to 256 concurrent sequences per GPU, each with 32K context length. During a burst of long-context requests, the combined KV cache memory exceeded the pod memory limit (80GB), triggering the Linux OOM killer. Without memory-aware routing, all pods received equal traffic regardless of current memory pressure.',
+        impact: function (g, r) { return 'Serving capacity dropped to ~15% for 22 minutes. Approximately ' + Math.round(r * 22 * 60 * 0.85) + ' requests failed or timed out. Error rate peaked at 68%. User-facing SLO violated for TTFT (target: 800ms, actual: 12,000ms+ during incident).'; },
+        resolution: '1. Reduced max_num_seqs from 256 to 64 per pod\n2. Set explicit memory limits for KV cache (60% of GPU memory)\n3. Implemented request-level memory estimation before admission\n4. Added OOM kill rate alerting with 1-minute granularity',
+        prevention: '1. Deploy llm-d EPP with memory-aware routing to direct requests away from memory-pressured pods\n2. Configure InferencePool with per-pod memory budgets and automatic request shedding\n3. Implement prefix caching via llm-d to reduce per-request memory overhead\n4. Add pre-admission memory checks with graceful rejection (429) instead of OOM kills',
+        lessons: '- Memory limits must account for worst-case KV cache growth, not average usage\n- OOM kills are the most disruptive failure mode because they destroy in-flight requests\n- Routing must be memory-aware to prevent hot-spotting under bursty long-context workloads',
+      },
+      queue: {
+        title: 'Queue Overflow Incident',
+        severity: 'SEV-2',
+        summary: function (g, r) { return 'Traffic surged to ' + r + ' RPS across the ' + g + '-GPU cluster, exceeding the inference queue capacity. Without backpressure, request queues grew unbounded, causing cascading timeouts and a sustained period of degraded service.'; },
+        timeline: function (t) {
+          return t + ' - Traffic spike detected: ' + 'request rate increases 4x in 90 seconds\n' +
+            offset(t, 2) + ' - Queue depth exceeds 500 per pod (normal: <10)\n' +
+            offset(t, 4) + ' - P99 latency breaches SLO: 12s (target: 2s)\n' +
+            offset(t, 6) + ' - First 503 errors returned to clients\n' +
+            offset(t, 10) + ' - On-call paged, manual rate limiting applied at gateway\n' +
+            offset(t, 15) + ' - HPA begins scaling pods (slow: model load takes 4 min)\n' +
+            offset(t, 25) + ' - New pods ready, queue depth normalizing\n' +
+            offset(t, 35) + ' - Full recovery, queue depth returns to nominal';
+        },
+        rootCause: 'A viral product launch drove inference traffic to 4x normal levels within 90 seconds. The cluster had no admission control or backpressure mechanism. Requests queued indefinitely, and the HPA was too slow to respond because model loading takes 4+ minutes per pod.',
+        impact: function (g, r) { return 'Service degraded for 35 minutes. ' + Math.round(r * 35 * 60 * 0.6) + ' requests experienced timeouts or 503 errors. P99 latency peaked at 15 seconds. Customer-visible error rate reached 42%.'; },
+        resolution: '1. Implemented gateway-level rate limiting (token bucket)\n2. Added queue depth alerting at 50 requests per pod\n3. Pre-scaled HPA minimum replicas based on traffic forecasts\n4. Configured request timeout at 10 seconds with client retry guidance',
+        prevention: '1. Deploy llm-d EPP load-aware routing to distribute queue depth evenly across all pods\n2. Configure InferencePool autoscaler with queue-depth-based scaling triggers\n3. Implement priority queues with llm-d to shed low-priority traffic first\n4. Use predictive autoscaling based on historical traffic patterns',
+        lessons: '- Inference model loading time (minutes) is fundamentally incompatible with sub-minute traffic spikes\n- Queue depth is the leading indicator; CPU/memory metrics lag by minutes\n- Rate limiting at the gateway is a necessity, not an optimization',
+      },
+      cache: {
+        title: 'Cache Thrashing Incident',
+        severity: 'SEV-1',
+        summary: function (g, r) { return 'KV cache hit rate collapsed from 82% to 6% across the ' + g + '-GPU cluster at ' + r + ' RPS. Random routing caused identical prompt prefixes to be recomputed on multiple pods simultaneously, consuming GPU cycles on redundant prefill operations.'; },
+        timeline: function (t) {
+          return t + ' - Cache hit rate drops below 20% (alert threshold: 40%)\n' +
+            offset(t, 3) + ' - GPU utilization spikes to 98% across all pods (redundant prefill)\n' +
+            offset(t, 5) + ' - TTFT latency increases 8x: 4,200ms (target: 500ms)\n' +
+            offset(t, 8) + ' - Throughput drops 60% despite high GPU utilization\n' +
+            offset(t, 12) + ' - On-call identifies cache thrashing via per-pod prefix logs\n' +
+            offset(t, 20) + ' - Temporary fix: pin top-10 prompts to dedicated pods\n' +
+            offset(t, 30) + ' - Cache hit rate recovers to 55% with pinned routing\n' +
+            offset(t, 45) + ' - Full prefix-aware routing deployed, hit rate reaches 87%';
+        },
+        rootCause: 'The Kubernetes Service used round-robin load balancing with no awareness of KV cache state. When the prompt mix shifted to include many requests sharing common prefixes (system prompts), each pod independently computed the same prefix, thrashing the cache and wasting GPU compute.',
+        impact: function (g, r) { return 'Effective throughput reduced by 60% for 45 minutes despite 98% GPU utilization. Approximately ' + Math.round(r * 45 * 60 * 0.6) + ' requests experienced degraded latency (4x+ SLO). GPU cost per token increased 3x during the incident.'; },
+        resolution: '1. Deployed prefix-aware routing via llm-d EPP\n2. Configured cache hit rate monitoring with per-prefix tracking\n3. Increased KV cache allocation from 40% to 65% of GPU memory\n4. Added redundant prefill detection alerting',
+        prevention: '1. llm-d prefix-aware scheduling is the primary fix: routes requests to pods with matching cached prefixes\n2. Configure EPP to maintain prefix affinity tables with sub-second updates\n3. Set up InferencePool with cache-aware health reporting\n4. Monitor kv_cache_hit_rate as a tier-1 SLO metric',
+        lessons: '- High GPU utilization does not mean high efficiency; redundant prefill is pure waste\n- Routing is the most impactful lever for inference performance at scale\n- Cache hit rate should be treated as a primary SLI alongside latency and throughput',
+      },
+      network: {
+        title: 'Network Saturation Incident',
+        severity: 'SEV-2',
+        summary: function (g, r) { return 'Inter-node network bandwidth saturated at ' + r + ' RPS across ' + g + ' GPUs. NCCL all-reduce operations timed out, causing tensor-parallel inference to stall and dropping throughput by 70%.'; },
+        timeline: function (t) {
+          return t + ' - NCCL timeout warnings begin appearing in pod logs\n' +
+            offset(t, 3) + ' - Network utilization hits 95% on inter-node links\n' +
+            offset(t, 5) + ' - All-reduce latency increases from 2ms to 180ms\n' +
+            offset(t, 8) + ' - Inference throughput drops 70%\n' +
+            offset(t, 12) + ' - On-call identifies network saturation via bandwidth metrics\n' +
+            offset(t, 18) + ' - Background checkpoint traffic disabled\n' +
+            offset(t, 22) + ' - Tensor parallel degree reduced from 8 to 4\n' +
+            offset(t, 30) + ' - Network utilization drops to 65%, throughput recovering';
+        },
+        rootCause: 'Tensor-parallel inference across 8 GPUs on different nodes required frequent all-reduce operations over the datacenter network. Background model checkpoint saving and telemetry export consumed 30% of available bandwidth, leaving insufficient headroom for inference traffic.',
+        impact: function (g, r) { return 'Throughput reduced by 70% for 30 minutes. ' + Math.round(r * 30 * 60 * 0.7) + ' requests affected by elevated latency. TTFT p99 increased from 400ms to 2,800ms.'; },
+        resolution: '1. Disabled non-critical background traffic during peak hours\n2. Reduced tensor parallel degree from 8 to 4\n3. Implemented traffic shaping to prioritize NCCL over background tasks\n4. Added network bandwidth alerting at 80% utilization',
+        prevention: '1. llm-d EPP topology-aware routing minimizes cross-node communication\n2. Schedule tensor-parallel groups on same-rack GPUs with dedicated switching\n3. Separate inference and management traffic onto different network planes\n4. Use InferencePool placement constraints to ensure GPU locality',
+        lessons: '- Network bandwidth is a shared resource; inference and ops traffic must be isolated\n- Tensor parallelism multiplies network sensitivity; prefer pipeline parallelism when possible\n- Monitor network utilization as a percentage of link capacity, not just absolute bytes',
+      },
+      thermal: {
+        title: 'GPU Thermal Throttling Incident',
+        severity: 'SEV-3',
+        summary: function (g, r) { return 'Sustained high utilization across ' + g + ' GPUs at ' + r + ' RPS caused thermal throttling on 40% of GPUs. Clock speeds dropped 30%, reducing inference throughput gradually over several hours.'; },
+        timeline: function (t) {
+          return t + ' - GPU temperatures exceed 83C on rack 7 (threshold: 80C)\n' +
+            offset(t, 15) + ' - Clock speed reduction detected: 1.8GHz to 1.26GHz\n' +
+            offset(t, 30) + ' - Throughput degradation noticed by users (gradual)\n' +
+            offset(t, 60) + ' - Monitoring correlates throughput drop with temperature\n' +
+            offset(t, 75) + ' - Cooling system inspection reveals reduced airflow in rack 7\n' +
+            offset(t, 90) + ' - Workloads migrated off affected GPUs\n' +
+            offset(t, 120) + ' - HVAC adjustment made, temperatures normalize';
+        },
+        rootCause: 'A cooling system filter in rack 7 was partially blocked, reducing airflow by 25%. Under sustained 95%+ GPU utilization, temperatures exceeded the throttle threshold (83C), triggering automatic clock speed reduction as a protective measure.',
+        impact: function (g, r) { return 'Gradual throughput reduction of 30% over 2 hours on affected GPUs. Total capacity impact: ~12% cluster-wide. Approximately ' + Math.round(r * 120 * 60 * 0.12) + ' requests experienced elevated latency.'; },
+        resolution: '1. Replaced blocked air filter in rack 7\n2. Migrated workloads to cooler GPUs during maintenance\n3. Added GPU temperature monitoring with 80C alert threshold\n4. Implemented preventive filter replacement schedule (monthly)',
+        prevention: '1. llm-d thermal-aware scheduling routes away from hot GPUs automatically\n2. InferencePool health checks include temperature as a readiness signal\n3. Configure automatic pod draining when GPU temperature exceeds warning threshold\n4. Maintain cooling headroom by capping per-rack GPU density',
+        lessons: '- Thermal throttling is insidious because it degrades gradually, making it hard to detect via threshold alerts\n- GPU temperature should be a standard dimension in scheduling decisions\n- Physical infrastructure maintenance (filters, fans) directly impacts inference SLOs',
+      },
+      etcd: {
+        title: 'etcd Write Limit Incident',
+        severity: 'SEV-1',
+        summary: function (g, r) { return 'At ' + g + ' GPUs handling ' + r + ' RPS, pod status updates exceeded etcd write throughput. The API server began returning 429 errors, stalling pod scheduling and causing stale routing that sent traffic to terminated pods.'; },
+        timeline: function (t) {
+          return t + ' - etcd write latency p99 exceeds 500ms (normal: 10ms)\n' +
+            offset(t, 3) + ' - API server begins returning 429 Too Many Requests\n' +
+            offset(t, 5) + ' - Pod scheduling delays reach 2+ minutes\n' +
+            offset(t, 8) + ' - Watch events lag, endpoints list shows stale pods\n' +
+            offset(t, 10) + ' - Traffic routed to terminated pods, error rate spikes\n' +
+            offset(t, 15) + ' - On-call identifies etcd as bottleneck via disk IOPS metrics\n' +
+            offset(t, 20) + ' - Reduced health check frequency from 5s to 30s (temporary)\n' +
+            offset(t, 25) + ' - Manual etcd compaction and defragmentation\n' +
+            offset(t, 35) + ' - etcd write latency returns to normal';
+        },
+        rootCause: 'Each pod in the cluster generated 5+ status updates per second (health checks, resource usage, scheduling annotations). At scale, this exceeded the ~10,000 writes/sec etcd throughput limit, causing write latency to spike and cascading into API server throttling.',
+        impact: function (g, r) { return 'Control plane degraded for 35 minutes. Pod scheduling paused for 15 minutes. Stale routing affected approximately ' + Math.round(r * 15 * 60 * 0.3) + ' requests. New pod deployments blocked entirely during the incident.'; },
+        resolution: '1. Deployed InferencePool CRD to batch endpoint updates\n2. Reduced per-pod status update frequency\n3. Upgraded etcd storage to NVMe SSDs\n4. Added etcd write latency monitoring with 50ms alert threshold',
+        prevention: '1. llm-d InferencePool CRD batches pod status updates, reducing etcd writes by 10x\n2. Use aggregated health reporting instead of per-pod annotations\n3. Size etcd cluster for peak write throughput with 40% headroom\n4. Implement etcd write rate limiting at the client level',
+        lessons: '- Kubernetes control plane has hard scaling limits that are often invisible until they break\n- etcd is the single point of failure for all cluster operations\n- At 50+ GPU pods, default Kubernetes health checking generates enough writes to stress etcd',
+      },
+      herd: {
+        title: 'Thundering Herd Incident',
+        severity: 'SEV-1',
+        summary: function (g, r) { return 'A rolling restart of ' + g + ' GPU pods triggered simultaneous model loading from shared storage. Storage IOPS saturated, causing cascading load failures and a complete serving outage lasting 25 minutes.'; },
+        timeline: function (t) {
+          return t + ' - Rolling restart initiated for model update across fleet\n' +
+            offset(t, 2) + ' - 30+ pods begin downloading model weights simultaneously\n' +
+            offset(t, 4) + ' - Shared storage IOPS spike to maximum (50,000 IOPS)\n' +
+            offset(t, 6) + ' - Model load timeouts: "FATAL: Model load timeout after 600s"\n' +
+            offset(t, 8) + ' - Pods enter CrashLoopBackOff, storage pressure increases\n' +
+            offset(t, 12) + ' - 60% of pods non-functional, serving capacity critical\n' +
+            offset(t, 15) + ' - On-call halts rollout, begins manual staged restart\n' +
+            offset(t, 20) + ' - Pods restarted in batches of 4, storage recovers between batches\n' +
+            offset(t, 35) + ' - All pods healthy, model update complete';
+        },
+        rootCause: 'The Deployment rollout strategy (maxSurge: 25%, maxUnavailable: 25%) caused too many pods to restart simultaneously. Each pod loads a 70B parameter model (~140GB) from shared NFS storage. Concurrent reads from 30+ pods saturated the storage controller.',
+        impact: function (g, r) { return 'Complete serving outage for 12 minutes, degraded service for 23 additional minutes. ' + Math.round(r * 35 * 60) + ' total requests affected. SLO violated for both availability (target: 99.9%) and latency.'; },
+        resolution: '1. Reduced maxSurge to 5% for inference workloads\n2. Implemented staged rollout with health-gate sequencing\n3. Pre-staged model weights on local NVMe before restart\n4. Added storage IOPS monitoring with per-pod throttling',
+        prevention: '1. llm-d model management provides staged rollout with automatic health gating\n2. Pods load models in controlled waves, with traffic shifted only after health checks pass\n3. Use local model caching so restarts do not require storage reads\n4. Configure InferencePool rolling update policy with inference-aware sequencing',
+        lessons: '- Model loading is the highest-risk operation in an inference cluster\n- Default Kubernetes rollout strategies are designed for stateless apps, not GPU inference pods\n- Storage IOPS must be provisioned for worst-case concurrent load, not average usage',
+      },
+      stale: {
+        title: 'Stale Routing Incident',
+        severity: 'SEV-2',
+        summary: function (g, r) { return 'Endpoint updates lagged behind pod lifecycle changes across the ' + g + '-GPU cluster at ' + r + ' RPS. Requests were routed to pods that had been terminated or swapped to a different model, causing elevated error rates for 20 minutes.'; },
+        timeline: function (t) {
+          return t + ' - Model swap initiated on 8 pods (Llama-70B to Llama-8B)\n' +
+            offset(t, 2) + ' - Endpoint list not yet updated, old model still advertised\n' +
+            offset(t, 4) + ' - Requests for Llama-70B routed to pods now serving Llama-8B\n' +
+            offset(t, 5) + ' - "model not found" error rate spikes to 18%\n' +
+            offset(t, 8) + ' - DNS TTL (30s) delays discovery of pod changes\n' +
+            offset(t, 12) + ' - On-call manually forces endpoint sync via kube-proxy restart\n' +
+            offset(t, 15) + ' - Endpoints update, error rate begins declining\n' +
+            offset(t, 20) + ' - Full recovery, routing reflects current pod state';
+        },
+        rootCause: 'Kubernetes Service endpoint updates propagate through multiple layers (kube-proxy, CoreDNS, iptables) with inherent latency. During a model swap, the routing table continued to advertise the old model for 8+ minutes. Health checks only validated pod liveness, not model identity.',
+        impact: function (g, r) { return 'Elevated error rate (18% peak) for 20 minutes. Approximately ' + Math.round(r * 20 * 60 * 0.18) + ' requests received incorrect model responses or errors. User trust impacted by inconsistent model behavior.'; },
+        resolution: '1. Added model identity to health check responses\n2. Reduced health check interval from 10s to 3s\n3. Configured kube-proxy to use IPVS mode for faster updates\n4. Implemented client-side model version validation',
+        prevention: '1. llm-d EPP maintains real-time pod health and model state via direct gRPC streams\n2. Routing decisions use sub-second freshness, eliminating stale endpoint windows\n3. Model swap operations are coordinated through InferencePool with atomic endpoint updates\n4. Configure EPP model-aware routing to match requests to pods by model identity',
+        lessons: '- Kubernetes endpoint propagation delay is a fundamental limitation for latency-sensitive routing\n- Health checks must validate application-level correctness (model identity), not just process liveness\n- Model swaps are operationally similar to deployments and need the same care',
+      },
+    };
+
+    function offset(timeStr, minutes) {
+      // Parse time and add minutes
+      var match = timeStr.match(/(\d{4}-\d{2}-\d{2}\s+)?(\d{2}):(\d{2})/);
+      if (!match) return timeStr;
+      var prefix = match[1] || '';
+      var h = parseInt(match[2], 10);
+      var m = parseInt(match[3], 10) + minutes;
+      while (m >= 60) { m -= 60; h = (h + 1) % 24; }
+      return prefix + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' UTC';
+    }
+
+    var generateBtn = document.getElementById('pmGenerate');
+    var outputEl = document.getElementById('pmOutput');
+    var outputBody = document.getElementById('pmOutputBody');
+    var copyBtn = document.getElementById('pmCopy');
+    var lastPlainText = '';
+
+    generateBtn.addEventListener('click', function () {
+      var scenarioKey = document.getElementById('pmScenario').value;
+      if (!scenarioKey) { alert('Please select a failure scenario.'); return; }
+
+      var gpus = document.getElementById('pmGpus').value || '64';
+      var rps = document.getElementById('pmRps').value || '2500';
+      var time = document.getElementById('pmTime').value || '2025-06-25 03:42 UTC';
+      var duration = document.getElementById('pmDuration').value || '45 minutes';
+
+      var sc = PM_SCENARIOS[scenarioKey];
+
+      var html = '';
+      // Meta grid
+      html += '<div class="pm-meta-grid">';
+      html += '<div class="pm-meta-item"><div class="pm-meta-label">Severity</div><div class="pm-meta-val" style="color:var(--red)">' + sc.severity + '</div></div>';
+      html += '<div class="pm-meta-item"><div class="pm-meta-label">Duration</div><div class="pm-meta-val">' + duration + '</div></div>';
+      html += '<div class="pm-meta-item"><div class="pm-meta-label">Cluster</div><div class="pm-meta-val">' + gpus + ' GPUs</div></div>';
+      html += '<div class="pm-meta-item"><div class="pm-meta-label">Traffic</div><div class="pm-meta-val">' + parseInt(rps, 10).toLocaleString() + ' RPS</div></div>';
+      html += '</div>';
+
+      var sections = [
+        { title: 'Summary', content: sc.summary(gpus, rps) },
+        { title: 'Timeline', content: sc.timeline(time) },
+        { title: 'Root Cause Analysis', content: sc.rootCause },
+        { title: 'Impact', content: sc.impact(gpus, rps) },
+        { title: 'Resolution Steps', content: sc.resolution },
+        { title: 'Prevention / Action Items (llm-d)', content: sc.prevention },
+        { title: 'Lessons Learned', content: sc.lessons },
+      ];
+
+      sections.forEach(function (sec) {
+        html += '<div class="pm-section">';
+        html += '<div class="pm-section-title">' + sec.title + '</div>';
+        html += '<div class="pm-section-content">' + sec.content + '</div>';
+        html += '</div>';
+      });
+
+      outputBody.innerHTML = html;
+      outputEl.classList.add('show');
+
+      // Build plain text for clipboard
+      lastPlainText = '# Post-mortem: ' + sc.title + '\n\n';
+      lastPlainText += 'Severity: ' + sc.severity + '\n';
+      lastPlainText += 'Date: ' + time + '\n';
+      lastPlainText += 'Duration: ' + duration + '\n';
+      lastPlainText += 'Cluster: ' + gpus + ' GPUs\n';
+      lastPlainText += 'Traffic: ' + rps + ' RPS\n\n';
+      sections.forEach(function (sec) {
+        lastPlainText += '## ' + sec.title + '\n\n' + sec.content + '\n\n';
+      });
+
+      copyBtn.textContent = 'Copy to Clipboard';
+      copyBtn.classList.remove('copied');
+    });
+
+    copyBtn.addEventListener('click', function () {
+      if (!lastPlainText) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(lastPlainText).then(function () {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(function () {
+            copyBtn.textContent = 'Copy to Clipboard';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      } else {
+        // Fallback
+        var ta = document.createElement('textarea');
+        ta.value = lastPlainText;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); copyBtn.textContent = 'Copied!'; copyBtn.classList.add('copied'); }
+        catch (e) { copyBtn.textContent = 'Copy failed'; }
+        document.body.removeChild(ta);
+        setTimeout(function () {
+          copyBtn.textContent = 'Copy to Clipboard';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      }
+    });
+  })();
 
 })();
 </script>
